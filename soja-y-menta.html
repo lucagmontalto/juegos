@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐱 Soja &amp; Menta — Aventura Felina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Press+Start+2P&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#1d2738;
+    --bg:#2c3e57;
+    --paper:#fef6e1;
+    --paper-edge:#dcc88e;
+    --ink:#1a1d24;
+    --ink-soft:#3e4452;
+    --accent:#ff6b6b;
+    --accent-dark:#c44949;
+    --gold:#ffd166;
+    --gold-dark:#c79a3d;
+    --mint:#7fb89b;
+    --mint-dark:#4d8970;
+    --soja:#9da4a8;
+    --menta:#7a5034;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{ min-height:100%; overflow-x:hidden; }
+  body{
+    font-family:'Fredoka', sans-serif;
+    color:var(--paper);
+    padding:14px 12px;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(255,209,102,.06) 0%, transparent 40%),
+      radial-gradient(circle at 80% 100%, rgba(127,184,155,.08) 0%, transparent 50%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    user-select:none;
+  }
+
+  .title-strip{
+    text-align:center;
+    margin-bottom:12px;
+  }
+  .title-strip h1{
+    font-family:'Bungee', cursive;
+    font-size:clamp(22px, 3.8vw, 34px);
+    letter-spacing:3px;
+    color:var(--paper);
+    text-shadow:
+      2px 2px 0 var(--accent),
+      4px 4px 0 var(--bg-deep);
+  }
+  .title-strip .sub{
+    font-family:'Press Start 2P', cursive;
+    font-size:10px;
+    color:var(--gold);
+    letter-spacing:2px;
+    margin-top:4px;
+  }
+
+  .game-wrap{
+    position:relative;
+    width:min(960px, 100vw - 16px);
+    max-width:960px;
+  }
+
+  .hud{
+    background:var(--bg-deep);
+    border:3px solid var(--paper-edge);
+    border-bottom:none;
+    border-radius:12px 12px 0 0;
+    padding:8px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    font-family:'Press Start 2P', cursive;
+    font-size:11px;
+    letter-spacing:1px;
+    color:var(--paper);
+  }
+  .hud .hud-section{ display:flex; gap:14px; align-items:center; }
+  .hud .pill{
+    background:var(--bg);
+    border:2px solid var(--paper-edge);
+    border-radius:8px;
+    padding:4px 10px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .hud .pill.lives .heart{ color:var(--accent); font-size:14px; }
+  .hud .pill.fish .label{ color:var(--gold); }
+  .hud .level-name{
+    text-align:center;
+    color:var(--gold);
+    font-size:13px;
+  }
+  .hud .icon-btn{
+    background:var(--bg);
+    border:2px solid var(--paper-edge);
+    color:var(--paper);
+    border-radius:8px;
+    width:32px; height:32px;
+    cursor:pointer;
+    font-size:14px;
+  }
+  .hud .icon-btn:hover{ background:var(--accent); border-color:var(--accent-dark); }
+
+  canvas{
+    display:block;
+    width:100%;
+    height:auto;
+    background:#74c0e8;
+    border:3px solid var(--paper-edge);
+    border-top:none;
+    border-radius:0 0 12px 12px;
+    image-rendering:pixelated;
+    image-rendering:crisp-edges;
+  }
+
+  .controls-help{
+    margin-top:14px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    max-width:960px;
+    width:100%;
+  }
+  .player-help{
+    background:var(--bg-deep);
+    border:2px solid var(--paper-edge);
+    border-radius:12px;
+    padding:10px 14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .player-help.soja{ border-left:6px solid var(--soja); }
+  .player-help.menta{ border-left:6px solid var(--menta); }
+  .player-help .name{
+    font-family:'Bungee', cursive;
+    font-size:18px;
+    color:var(--paper);
+    letter-spacing:1px;
+  }
+  .player-help.soja .name{ color:#bcc4ca; }
+  .player-help.menta .name{ color:#d4a585; }
+  .player-help .keys{
+    font-family:'Press Start 2P', cursive;
+    font-size:9px;
+    color:var(--gold);
+    letter-spacing:1px;
+    line-height:1.6;
+  }
+  .player-help .key{
+    display:inline-block;
+    background:var(--bg);
+    border:2px solid var(--paper-edge);
+    border-radius:4px;
+    padding:2px 6px;
+    margin:0 1px;
+    color:var(--paper);
+  }
+  @media (max-width:560px){
+    .controls-help{ grid-template-columns:1fr; }
+  }
+
+  /* ========== Touch controls (mobile/iPad) ========== */
+  .touch-controls{
+    display:none;
+    position:fixed;
+    bottom:8px;
+    left:0; right:0;
+    padding:0 12px;
+    z-index:50;
+    justify-content:space-between;
+    pointer-events:none;
+    user-select:none;
+  }
+  .touch-player{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    pointer-events:auto;
+  }
+  .touch-name{
+    font-family:'Press Start 2P', cursive;
+    font-size:8px;
+    letter-spacing:2px;
+    background:var(--bg-deep);
+    border:2px solid var(--paper-edge);
+    padding:3px 9px;
+    border-radius:6px;
+  }
+  .touch-player.soja .touch-name{ color:#bcc4ca; }
+  .touch-player.menta .touch-name{ color:#d4a585; }
+  .dpad{ display:flex; gap:8px; }
+  .touch-btn{
+    width:54px; height:54px;
+    border:3px solid var(--paper-edge);
+    background:rgba(20,30,50,.6);
+    color:var(--paper);
+    border-radius:14px;
+    font-size:24px;
+    user-select:none;
+    -webkit-user-select:none;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+    font-weight:700;
+    cursor:pointer;
+    backdrop-filter:blur(8px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:transform .08s ease, background .12s ease;
+  }
+  .touch-btn:active{
+    background:rgba(255,209,102,.6);
+    transform:scale(.9);
+  }
+  .touch-btn.jump{
+    background:rgba(82,183,136,.6);
+    border-color:#7fb89b;
+  }
+  .touch-btn.jump:active{ background:rgba(82,183,136,.9); }
+  /* Show on touch devices */
+  @media (hover:none) and (pointer:coarse){
+    .touch-controls{ display:flex; }
+    body{ padding-bottom:84px; }
+  }
+  /* Bigger buttons on iPad-sized touch */
+  @media (hover:none) and (pointer:coarse) and (min-width:768px){
+    .touch-btn{ width:70px; height:70px; font-size:30px; border-radius:18px; }
+    .touch-name{ font-size:10px; }
+    body{ padding-bottom:104px; }
+  }
+
+  /* Portrait warning for narrow phones */
+  .rotate-hint{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(10,15,25,.97);
+    color:var(--paper);
+    z-index:200;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:14px;
+    padding:30px;
+    text-align:center;
+  }
+  .rotate-hint .icon{ font-size:64px; animation:rotateAnim 1.8s ease-in-out infinite; }
+  @keyframes rotateAnim{
+    0%, 100%{ transform:rotate(-20deg); }
+    50%{ transform:rotate(70deg); }
+  }
+  .rotate-hint h2{
+    font-family:'Bungee', cursive;
+    font-size:24px;
+    letter-spacing:2px;
+  }
+  .rotate-hint p{
+    font-family:'Fredoka', sans-serif;
+    max-width:300px;
+    color:#cad1dc;
+  }
+  @media (hover:none) and (pointer:coarse) and (orientation:portrait) and (max-width:600px){
+    .rotate-hint{ display:flex; }
+  }
+
+  /* Overlay (menu, level intro, game over, etc) */
+  .overlay{
+    position:absolute;
+    inset:0;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:rgba(29,39,56,.78);
+    backdrop-filter:blur(2px);
+    color:var(--paper);
+    text-align:center;
+    z-index:5;
+    padding:20px;
+    border-radius:12px;
+  }
+  .overlay.show{ display:flex; }
+  .overlay h2{
+    font-family:'Bungee', cursive;
+    font-size:clamp(28px, 5vw, 48px);
+    letter-spacing:3px;
+    margin-bottom:12px;
+    text-shadow: 3px 3px 0 var(--accent), 5px 5px 0 var(--bg-deep);
+    animation: pop .55s cubic-bezier(.2,1.4,.4,1);
+  }
+  .overlay p{
+    font-family:'Fredoka', sans-serif;
+    font-size:18px;
+    margin-bottom:18px;
+    color:var(--paper);
+    max-width:600px;
+  }
+  .overlay .small{
+    font-family:'Press Start 2P', cursive;
+    font-size:11px;
+    color:var(--gold);
+    letter-spacing:2px;
+    margin-top:18px;
+    animation: blink 1.2s infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.4;} }
+  @keyframes pop{
+    0%{ transform:scale(.3) rotate(-10deg); opacity:0; }
+    60%{ transform:scale(1.1) rotate(5deg); opacity:1; }
+    100%{ transform:scale(1) rotate(0); opacity:1; }
+  }
+  .overlay .stat{
+    font-family:'Press Start 2P', cursive;
+    font-size:13px;
+    color:var(--gold);
+    letter-spacing:2px;
+    margin:6px 0;
+  }
+  .overlay .cat-row{
+    display:flex;
+    gap:30px;
+    margin-bottom:14px;
+  }
+  .overlay .cat-card{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+  }
+  .overlay .cat-card canvas{
+    width:80px; height:80px;
+    background:transparent;
+    border:none;
+    image-rendering:pixelated;
+  }
+  .overlay .cat-card .nm{
+    font-family:'Bungee', cursive;
+    font-size:14px;
+    letter-spacing:1px;
+  }
+  .overlay .cat-card.soja .nm{ color:#bcc4ca; }
+  .overlay .cat-card.menta .nm{ color:#d4a585; }
+</style>
+</head>
+<body>
+
+<div class="title-strip">
+  <h1>🐱 SOJA &amp; MENTA</h1>
+  <p class="sub">— AVENTURA FELINA —</p>
+</div>
+
+<div class="game-wrap">
+  <div class="hud">
+    <div class="hud-section">
+      <span class="pill lives">
+        <span class="heart">♥</span>
+        <span id="hud-lives">3</span>
+      </span>
+      <span class="pill fish">
+        <span class="label">🐟</span>
+        <span id="hud-fish">0/0</span>
+      </span>
+    </div>
+    <div class="level-name" id="hud-level">Nivel 1</div>
+    <div class="hud-section">
+      <button class="icon-btn" id="pause-btn" title="pausar (P)">⏸</button>
+      <button class="icon-btn" id="restart-btn" title="reiniciar nivel (R)">↺</button>
+    </div>
+  </div>
+
+  <canvas id="game" width="960" height="520"></canvas>
+
+  <div class="overlay" id="overlay">
+    <h2 id="overlay-title">¡Hola!</h2>
+    <p id="overlay-text">texto</p>
+    <div id="overlay-extra"></div>
+    <div class="small" id="overlay-prompt">presioná ESPACIO para empezar</div>
+  </div>
+</div>
+
+<div class="controls-help">
+  <div class="player-help soja">
+    <canvas id="cat-soja-mini" width="60" height="60"></canvas>
+    <div>
+      <div class="name">SOJA</div>
+      <div class="keys">
+        <span class="key">W</span> saltar &nbsp;
+        <span class="key">A</span><span class="key">D</span> moverse
+      </div>
+    </div>
+  </div>
+  <div class="player-help menta">
+    <canvas id="cat-menta-mini" width="60" height="60"></canvas>
+    <div>
+      <div class="name">MENTA</div>
+      <div class="keys">
+        <span class="key">↑</span> saltar &nbsp;
+        <span class="key">←</span><span class="key">→</span> moverse
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Touch controls (only show on touch devices via CSS) -->
+<div class="touch-controls" id="touch-controls">
+  <div class="touch-player soja">
+    <div class="touch-name">SOJA</div>
+    <div class="dpad">
+      <button class="touch-btn dir" data-key="KeyA" aria-label="Soja izquierda">◄</button>
+      <button class="touch-btn jump" data-key="KeyW" aria-label="Soja saltar">▲</button>
+      <button class="touch-btn dir" data-key="KeyD" aria-label="Soja derecha">►</button>
+    </div>
+  </div>
+  <div class="touch-player menta">
+    <div class="touch-name">MENTA</div>
+    <div class="dpad">
+      <button class="touch-btn dir" data-key="ArrowLeft" aria-label="Menta izquierda">◄</button>
+      <button class="touch-btn jump" data-key="ArrowUp" aria-label="Menta saltar">▲</button>
+      <button class="touch-btn dir" data-key="ArrowRight" aria-label="Menta derecha">►</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rotate-to-landscape hint (only shows on portrait phones) -->
+<div class="rotate-hint">
+  <div class="icon">📱</div>
+  <h2>Girá el celular</h2>
+  <p>Soja &amp; Menta se juega mejor en horizontal — los dos gatos van uno a cada lado de la pantalla.</p>
+</div>
+
+<script>
+/* =========================================================
+   Soja & Menta — Aventura Felina
+   ========================================================= */
+
+const TILE = 40;
+const COLS = 24;
+const ROWS = 13;
+const W = COLS * TILE;
+const H = ROWS * TILE;
+
+const GRAVITY = 1900;
+const JUMP_VEL = -720;     // salto más alto (~3.4 tiles de altura máx)
+const MOVE_SPEED = 230;
+const MAX_FALL = 900;
+const FRICTION = 0.82;
+
+/* ---------- Levels ---------- */
+/* Tile chars:
+    .  empty
+    #  solid block (ground/wall)
+    =  grass-topped solid (visual)
+    -  jump-through platform (one-way: solid only when falling onto it)
+    F  fish (collectible)
+    D  dog (enemy, patrols)
+    V  vacuum (enemy, moves on track)
+    @  Soja spawn
+    &  Menta spawn
+    E  exit door
+*/
+const LEVELS = [
+  {
+    /* LEVEL 1 — El Patio (intro suave, sin enemigos ni mecánicas nuevas) */
+    name: 'El Patio',
+    bg: 'patio',
+    layout: [
+      '........................',
+      '.............F..........',
+      '............----........',
+      '..........F....F........',
+      '.........---..---.......',
+      '........................',
+      '.......---..---..---....',
+      '......F....F....F.......',
+      '....---..---..---..---..',
+      '........................',
+      '..---....---............',
+      '@&...F............F...E.',
+      '========================'
+    ]
+  },
+  {
+    /* LEVEL 2 — La Cocina (intro de plataforma móvil + resorte + 1 aspiradora) */
+    name: 'La Cocina',
+    bg: 'cocina',
+    layout: [
+      '........................',
+      '.............F..........',
+      '............----........',
+      '..........F....F........',
+      '.........---..---.......',
+      '........................',
+      '.....---........---.....',
+      '......F....M....F.......',
+      '....---........---......',
+      '........................',
+      '..---....S........---...',
+      '@&............V.......E.',
+      '########################'
+    ]
+  },
+  {
+    /* LEVEL 3 — El Jardín (pájaros, perros, pescados dorados) */
+    name: 'El Jardín',
+    bg: 'jardin',
+    layout: [
+      '........................',
+      '.....G..........G.......',
+      '....---........---......',
+      '........................',
+      '........F.....F.........',
+      '.......---...---........',
+      '..B...---..---..---...B.',
+      '.......F....F....F......',
+      '......---..---..---.....',
+      '...F......F.......F.....',
+      '..---....---......---...',
+      '@&...D............D...E.',
+      '========================'
+    ]
+  },
+  {
+    /* LEVEL 4 — El Sótano (¡púas y plataforma móvil vertical!) */
+    name: 'El Sótano',
+    bg: 'sotano',
+    layout: [
+      '........................',
+      '..........F....F........',
+      '.........---..---.......',
+      '........................',
+      '....F.....F.....F.......',
+      '...---...---...---......',
+      '........................',
+      '.....F....N.....F.......',
+      '....---........---......',
+      '.....F....F....F....F...',
+      '....---..---..---..---..',
+      '@&S..^.D..........^.D.E.',
+      '########################'
+    ]
+  },
+  {
+    /* LEVEL 5 — El Tejado (todo el menú: pájaros, púas, resortes, móvil, dorados) */
+    name: 'El Tejado',
+    bg: 'tejado',
+    layout: [
+      '........................',
+      '..G.........F........G..',
+      '.---.......---......---.',
+      '..B....................B',
+      '.......F.....F..........',
+      '......---...---.........',
+      '........................',
+      '.....F....N.....F.......',
+      '....---........---......',
+      '.....F....F....F....F...',
+      '....---..---..---..---..',
+      '@&S...^....D....^...S.E.',
+      '========================'
+    ]
+  }
+];
+
+/* ---------- Cat palettes ---------- */
+const PALETTES = {
+  soja: {
+    body:'#9da4a8',     // grey
+    bodyDark:'#7a8085',
+    belly:'#d4dade',
+    stripe:'#6f767b',
+    ear:'#f7c0cc',
+    eye:'#f4b942',      // amber
+    pupil:'#1a1a1a',
+    nose:'#d99099'
+  },
+  menta: {
+    body:'#7a5034',     // brown
+    bodyDark:'#5a3522',
+    belly:'#fbf2dd',    // white belly
+    stripe:'#2c1810',   // dark patches
+    ear:'#f7c0cc',
+    eye:'#86c499',      // green
+    pupil:'#1a1a1a',
+    nose:'#3a1e10'
+  }
+};
+
+/* ---------- State ---------- */
+const state = {
+  scene: 'menu',     // menu | playing | paused | levelComplete | gameOver | gameComplete
+  levelIdx: 0,
+  lives: 3,
+  fishCollected: 0,
+  totalFish: 0,
+  bothInExit: 0,     // timer for exit
+  shake: 0,
+  time: 0,
+  totalFishGame: 0
+};
+
+let players = [];
+let tiles = [];     // 2D array
+let fishes = [];
+let enemies = [];
+let movingPlatforms = [];
+let exit = null;
+let particles = [];
+let bgClouds = [];
+let bgStars = [];
+
+/* ---------- Input ---------- */
+const keys = {};
+window.addEventListener('keydown', (e) => {
+  // Don't let arrow/space scroll the page
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
+  keys[e.code] = true;
+
+  // Scene transitions
+  if(state.scene === 'menu' && (e.code === 'Space' || e.code === 'Enter')){
+    startGame();
+  } else if(state.scene === 'levelComplete' && (e.code === 'Space' || e.code === 'Enter')){
+    nextLevel();
+  } else if(state.scene === 'gameOver' && (e.code === 'Space' || e.code === 'Enter')){
+    state.lives = 3;
+    state.levelIdx = 0;
+    loadLevel(0);
+    state.scene = 'playing';
+    hideOverlay();
+  } else if(state.scene === 'gameComplete' && (e.code === 'Space' || e.code === 'Enter')){
+    state.lives = 3;
+    state.levelIdx = 0;
+    state.totalFishGame = 0;
+    loadLevel(0);
+    state.scene = 'playing';
+    hideOverlay();
+  } else if(state.scene === 'playing' && (e.code === 'KeyP' || e.code === 'Escape')){
+    state.scene = 'paused';
+    showOverlay('Pausado', 'Tomate un mate, esperamos.', '', 'P para seguir');
+  } else if(state.scene === 'paused' && (e.code === 'KeyP' || e.code === 'Escape' || e.code === 'Space')){
+    state.scene = 'playing';
+    hideOverlay();
+  }
+  if(state.scene === 'playing' && e.code === 'KeyR'){
+    loadLevel(state.levelIdx);
+  }
+});
+window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+/* Touch buttons → same `keys` map the keyboard uses */
+document.querySelectorAll('.touch-btn').forEach(btn => {
+  const key = btn.dataset.key;
+  const press = (e) => {
+    e.preventDefault();
+    keys[key] = true;
+    // Also kick scene transitions (so spring/jump start the game from menu, etc.)
+    if(state.scene === 'menu' && (key === 'KeyW' || key === 'ArrowUp')){ startGame(); }
+    else if(state.scene === 'levelComplete' && (key === 'KeyW' || key === 'ArrowUp')){ nextLevel(); }
+    else if(state.scene === 'gameOver' && (key === 'KeyW' || key === 'ArrowUp')){
+      state.lives = 3; state.levelIdx = 0;
+      loadLevel(0); state.scene = 'playing'; hideOverlay();
+    } else if(state.scene === 'gameComplete' && (key === 'KeyW' || key === 'ArrowUp')){
+      state.lives = 3; state.levelIdx = 0; state.totalFishGame = 0;
+      loadLevel(0); state.scene = 'playing'; hideOverlay();
+    }
+  };
+  const release = (e) => { if(e) e.preventDefault?.(); keys[key] = false; };
+  btn.addEventListener('touchstart', press, { passive: false });
+  btn.addEventListener('touchend', release, { passive: false });
+  btn.addEventListener('touchcancel', release);
+  btn.addEventListener('mousedown', press);
+  btn.addEventListener('mouseup', release);
+  btn.addEventListener('mouseleave', release);
+});
+
+// Prevent double-tap zoom inside the canvas / controls area
+document.body.addEventListener('touchmove', (e) => {
+  if(e.target.closest('.touch-controls') || e.target.tagName === 'CANVAS') e.preventDefault();
+}, { passive: false });
+
+function getInput(playerId){
+  if(playerId === 'soja'){
+    return {
+      left: keys['KeyA'],
+      right: keys['KeyD'],
+      jump: keys['KeyW'] || keys['Space'],
+      jumpKey: 'KeyW'
+    };
+  } else {
+    return {
+      left: keys['ArrowLeft'],
+      right: keys['ArrowRight'],
+      jump: keys['ArrowUp'],
+      jumpKey: 'ArrowUp'
+    };
+  }
+}
+
+/* ---------- Player class ---------- */
+class Player {
+  constructor(id, x, y){
+    this.id = id;
+    this.palette = PALETTES[id];
+    this.x = x;
+    this.y = y;
+    this.vx = 0; this.vy = 0;
+    this.w = 30; this.h = 32;
+    this.facing = 1;
+    this.onGround = false;
+    this.coyote = 0;
+    this.jumpBuffer = 0;
+    this.jumpHeld = false;
+    this.walk = 0;
+    this.squashY = 1;
+    this.invuln = 0;
+    this.spawnX = x; this.spawnY = y;
+    this.atExit = false;
+  }
+  respawn(){
+    this.x = this.spawnX; this.y = this.spawnY;
+    this.vx = 0; this.vy = 0;
+    this.invuln = 1.5;
+    this.atExit = false;
+  }
+  update(dt){
+    const input = getInput(this.id);
+
+    // Horizontal
+    if(input.left){ this.vx = -MOVE_SPEED; this.facing = -1; }
+    else if(input.right){ this.vx = MOVE_SPEED; this.facing = 1; }
+    else { this.vx *= FRICTION; if(Math.abs(this.vx) < 5) this.vx = 0; }
+
+    // Jump (with buffer + coyote time)
+    const justPressed = input.jump && !this.jumpHeld;
+    this.jumpHeld = input.jump;
+    if(justPressed) this.jumpBuffer = 0.13;
+    if(this.jumpBuffer > 0 && (this.onGround || this.coyote > 0)){
+      this.vy = JUMP_VEL;
+      this.onGround = false;
+      this.coyote = 0;
+      this.jumpBuffer = 0;
+      this.squashY = 1.35;
+      spawnDust(this.x + this.w/2, this.y + this.h, 4);
+    }
+    // Variable jump (release = cut)
+    if(!input.jump && this.vy < -260) this.vy = -260;
+
+    // Gravity
+    this.vy += GRAVITY * dt;
+    if(this.vy > MAX_FALL) this.vy = MAX_FALL;
+
+    // Move + collide
+    const wasGrounded = this.onGround;
+    this.onGround = false;
+    moveAndCollide(this, dt);
+
+    if(wasGrounded && !this.onGround) this.coyote = 0.1;
+    if(this.coyote > 0) this.coyote -= dt;
+    if(this.jumpBuffer > 0) this.jumpBuffer -= dt;
+    if(this.invuln > 0) this.invuln -= dt;
+
+    // Squash recovery
+    this.squashY += (1 - this.squashY) * 0.18;
+
+    // Walk anim
+    if(Math.abs(this.vx) > 10 && this.onGround) this.walk += dt * 8;
+
+    // Land squash
+    if(!wasGrounded && this.onGround) this.squashY = 0.7;
+
+    // Out of bounds (fall off bottom)
+    if(this.y > H + 80) {
+      this.x = this.spawnX; this.y = this.spawnY;
+      this.vx = 0; this.vy = 0;
+      // Lose a life
+      onPlayerDeath(this);
+    }
+  }
+  draw(ctx){
+    if(this.invuln > 0 && Math.floor(this.invuln * 14) % 2 === 0) return;
+    drawCat(ctx, this.x + this.w/2, this.y + this.h, this.palette, this.id, this.facing, this.squashY, this.walk, this.onGround);
+  }
+}
+
+/* ---------- Tiles & collision ---------- */
+function tileAt(col, row){
+  if(row < 0 || row >= ROWS || col < 0 || col >= COLS) return null;
+  return tiles[row][col];
+}
+function isSolid(t){ return t === '#' || t === '='; }
+function isPlatform(t){ return t === '-'; }
+
+function moveAndCollide(p, dt){
+  // Horizontal
+  p.x += p.vx * dt;
+  let minCol = Math.floor(p.x / TILE);
+  let maxCol = Math.floor((p.x + p.w - 1) / TILE);
+  let minRow = Math.floor(p.y / TILE);
+  let maxRow = Math.floor((p.y + p.h - 1) / TILE);
+  for(let r = minRow; r <= maxRow; r++){
+    for(let c = minCol; c <= maxCol; c++){
+      const t = tileAt(c, r);
+      if(isSolid(t)){
+        if(p.vx > 0){ p.x = c * TILE - p.w; p.vx = 0; }
+        else if(p.vx < 0){ p.x = (c + 1) * TILE; p.vx = 0; }
+      } else if(t === '^' && p.invuln <= 0){
+        // Touched a spike sideways: instant kill
+        spikeKill(p);
+        return;
+      }
+    }
+  }
+  // Vertical
+  p.y += p.vy * dt;
+  minCol = Math.floor(p.x / TILE);
+  maxCol = Math.floor((p.x + p.w - 1) / TILE);
+  minRow = Math.floor(p.y / TILE);
+  maxRow = Math.floor((p.y + p.h - 1) / TILE);
+  for(let r = minRow; r <= maxRow; r++){
+    for(let c = minCol; c <= maxCol; c++){
+      const t = tileAt(c, r);
+      if(t === '^'){
+        // Spikes — kill on contact (only when descending onto them or grazing)
+        if(p.invuln <= 0 && p.vy >= 0){
+          spikeKill(p);
+          return;
+        }
+      } else if(t === 'S' && p.vy > 0){
+        // Spring: super-jump bounce
+        const platTop = r * TILE;
+        const prevBottom = p.y + p.h - p.vy * dt;
+        if(prevBottom <= platTop + 2){
+          p.y = platTop - p.h;
+          p.vy = JUMP_VEL * 1.45;
+          p.onGround = false;
+          p.squashY = 0.5;
+          spawnDust(p.x + p.w/2, p.y + p.h, 14);
+          spawnSparkle(p.x + p.w/2, p.y + p.h - 4, '#e63946');
+        }
+      } else if(isSolid(t)){
+        if(p.vy > 0){ p.y = r * TILE - p.h; p.vy = 0; p.onGround = true; }
+        else if(p.vy < 0){ p.y = (r + 1) * TILE; p.vy = 0; }
+      } else if(isPlatform(t) && p.vy > 0){
+        // One-way platform: only collide if player's bottom was above the platform top
+        const platTop = r * TILE;
+        const prevBottom = p.y + p.h - p.vy * dt;
+        if(prevBottom <= platTop + 1){
+          p.y = platTop - p.h; p.vy = 0; p.onGround = true;
+        }
+      }
+    }
+  }
+
+  // Moving platforms — treat as one-way platforms from above, plus carry the player
+  for(const mp of movingPlatforms){
+    if(p.x + p.w <= mp.x || p.x >= mp.x + mp.w) continue;
+    // Player must be roughly at platform vertical level
+    if(p.y + p.h < mp.y || p.y > mp.y + mp.h + 4) continue;
+    if(p.vy >= 0){
+      const platTop = mp.y;
+      const prevBottom = p.y + p.h - p.vy * dt;
+      if(prevBottom <= platTop + 3){
+        p.y = platTop - p.h;
+        p.vy = 0;
+        p.onGround = true;
+        // Carry the player along with the platform
+        p.x += (mp.x - mp.prevX);
+      }
+    }
+  }
+}
+
+function spikeKill(p){
+  state.shake = 0.5;
+  spawnPoof(p.x + p.w/2, p.y + p.h/2);
+  onPlayerDeath(p);
+}
+
+/* ---------- Enemies ---------- */
+class Dog {
+  constructor(x, y){
+    this.x = x; this.y = y;
+    this.w = 36; this.h = 30;
+    this.vx = 60; this.vy = 0;
+    this.facing = 1;
+    this.alive = true;
+    this.bark = 0;
+  }
+  update(dt){
+    if(!this.alive) return;
+    // Detect player nearby for chase
+    let chase = null;
+    let chaseDist = 250;
+    for(const p of players){
+      const dx = (p.x + p.w/2) - (this.x + this.w/2);
+      const dy = (p.y + p.h/2) - (this.y + this.h/2);
+      const d = Math.hypot(dx, dy);
+      if(d < chaseDist && Math.abs(dy) < 80){
+        chase = p; chaseDist = d;
+      }
+    }
+    if(chase){
+      const dx = (chase.x + chase.w/2) - (this.x + this.w/2);
+      this.vx = Math.sign(dx) * 110;
+      this.facing = Math.sign(dx);
+      this.bark = (this.bark + dt) % 1.2;
+    } else {
+      // Patrol back and forth, turn at edges or walls
+      this.vx = this.facing * 60;
+    }
+
+    // Gravity
+    this.vy += GRAVITY * dt;
+    if(this.vy > MAX_FALL) this.vy = MAX_FALL;
+
+    // Horizontal collision
+    this.x += this.vx * dt;
+    const minRow = Math.floor(this.y / TILE);
+    const maxRow = Math.floor((this.y + this.h - 1) / TILE);
+    for(let r = minRow; r <= maxRow; r++){
+      const cR = Math.floor((this.x + this.w - 1) / TILE);
+      const cL = Math.floor(this.x / TILE);
+      if(this.vx > 0 && isSolid(tileAt(cR, r))){ this.x = cR * TILE - this.w; this.vx = -this.vx; this.facing = -this.facing; }
+      else if(this.vx < 0 && isSolid(tileAt(cL, r))){ this.x = (cL + 1) * TILE; this.vx = -this.vx; this.facing = -this.facing; }
+    }
+    // Vertical
+    this.y += this.vy * dt;
+    const minCol = Math.floor(this.x / TILE);
+    const maxCol = Math.floor((this.x + this.w - 1) / TILE);
+    for(let c = minCol; c <= maxCol; c++){
+      const rB = Math.floor((this.y + this.h - 1) / TILE);
+      const rT = Math.floor(this.y / TILE);
+      const tB = tileAt(c, rB);
+      if(this.vy > 0 && (isSolid(tB) || isPlatform(tB))){ this.y = rB * TILE - this.h; this.vy = 0; }
+      else if(this.vy < 0 && isSolid(tileAt(c, rT))){ this.y = (rT + 1) * TILE; this.vy = 0; }
+    }
+    // Edge detection — turn around if about to fall (when not chasing)
+    if(!chase){
+      const aheadX = this.x + (this.facing > 0 ? this.w + 2 : -2);
+      const belowR = Math.floor((this.y + this.h + 4) / TILE);
+      const aheadC = Math.floor(aheadX / TILE);
+      const below = tileAt(aheadC, belowR);
+      if(!isSolid(below) && !isPlatform(below)){
+        this.facing = -this.facing;
+        this.vx = -this.vx;
+      }
+    }
+  }
+  draw(ctx){
+    if(!this.alive) return;
+    ctx.save();
+    ctx.translate(this.x + this.w/2, this.y + this.h);
+    ctx.scale(this.facing >= 0 ? 1 : -1, 1);
+    drawDog(ctx);
+    ctx.restore();
+  }
+}
+
+class Vacuum {
+  constructor(x, y){
+    this.x = x; this.y = y;
+    this.w = 38; this.h = 28;
+    this.startX = x;
+    this.range = 140;
+    this.vx = 80;
+    this.alive = true;
+    this.spin = 0;
+  }
+  update(dt){
+    if(!this.alive) return;
+    this.spin += dt * 12;
+    this.x += this.vx * dt;
+    if(this.x < this.startX - this.range){ this.x = this.startX - this.range; this.vx = -this.vx; }
+    if(this.x > this.startX + this.range){ this.x = this.startX + this.range; this.vx = -this.vx; }
+  }
+  draw(ctx){
+    if(!this.alive) return;
+    ctx.save();
+    ctx.translate(this.x + this.w/2, this.y + this.h/2);
+    drawVacuum(ctx, this.spin, this.vx > 0 ? 1 : -1);
+    ctx.restore();
+  }
+}
+
+/* ---------- Bird (flying enemy) ---------- */
+class Bird {
+  constructor(x, y){
+    this.x = x; this.y = y;
+    this.baseY = y;
+    this.w = 32; this.h = 22;
+    this.vx = 95 * (Math.random() < 0.5 ? 1 : -1);
+    this.t = Math.random() * Math.PI * 2;
+    this.alive = true;
+    this.flap = 0;
+  }
+  update(dt){
+    if(!this.alive) return;
+    this.x += this.vx * dt;
+    this.t += dt * 1.6;
+    this.y = this.baseY + Math.sin(this.t) * 28;
+    this.flap += dt * 14;
+    // Wrap around screen edges
+    if(this.x < -60) this.x = W + 30;
+    if(this.x > W + 60) this.x = -50;
+  }
+  draw(ctx){
+    if(!this.alive) return;
+    ctx.save();
+    ctx.translate(this.x + this.w/2, this.y + this.h/2);
+    ctx.scale(this.vx >= 0 ? -1 : 1, 1);  // face direction of motion (head leads)
+    drawBird(ctx, this.flap);
+    ctx.restore();
+  }
+}
+
+/* ---------- Moving platform ---------- */
+class MovingPlatform {
+  constructor(x, y, axis, range){
+    this.x = x; this.y = y;
+    this.startX = x; this.startY = y;
+    this.prevX = x; this.prevY = y;
+    this.axis = axis;          // 'h' (horizontal) or 'v' (vertical)
+    this.range = range;        // pixels each direction from start
+    this.w = TILE * 3;
+    this.h = 14;
+    this.vx = axis === 'h' ? 75 : 0;
+    this.vy = axis === 'v' ? 60 : 0;
+  }
+  update(dt){
+    this.prevX = this.x;
+    this.prevY = this.y;
+    if(this.axis === 'h'){
+      this.x += this.vx * dt;
+      if(this.x <= this.startX - this.range){ this.x = this.startX - this.range; this.vx = -this.vx; }
+      if(this.x >= this.startX + this.range){ this.x = this.startX + this.range; this.vx = -this.vx; }
+    } else {
+      this.y += this.vy * dt;
+      if(this.y <= this.startY - this.range){ this.y = this.startY - this.range; this.vy = -this.vy; }
+      if(this.y >= this.startY + this.range){ this.y = this.startY + this.range; this.vy = -this.vy; }
+    }
+  }
+  draw(ctx){
+    if(this.axis === 'v'){
+      // Chains hanging from ceiling
+      ctx.strokeStyle = 'rgba(140,140,140,.55)';
+      ctx.lineWidth = 2;
+      for(let i = 0; i < 2; i++){
+        const x = this.x + 14 + i * (this.w - 28);
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, this.y);
+        ctx.stroke();
+      }
+    }
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,.18)';
+    ctx.fillRect(this.x + 2, this.y + this.h, this.w - 4, 3);
+    // Wood body
+    ctx.fillStyle = '#5a3520';
+    roundRect(ctx, this.x, this.y, this.w, this.h, 4); ctx.fill();
+    ctx.fillStyle = '#a87444';
+    roundRect(ctx, this.x, this.y, this.w, this.h - 4, 4); ctx.fill();
+    // Wood grain
+    ctx.strokeStyle = 'rgba(0,0,0,.18)';
+    ctx.lineWidth = 1;
+    for(let i = 1; i < 3; i++){
+      const lx = this.x + i * this.w/3;
+      ctx.beginPath();
+      ctx.moveTo(lx, this.y + 3);
+      ctx.lineTo(lx, this.y + this.h - 5);
+      ctx.stroke();
+    }
+    // Bolts
+    ctx.fillStyle = '#fed16d';
+    [4, this.w - 8].forEach(dx => {
+      ctx.beginPath();
+      ctx.arc(this.x + dx, this.y + this.h/2, 2, 0, Math.PI*2);
+      ctx.fill();
+    });
+  }
+}
+
+/* ---------- Particles ---------- */
+class Particle {
+  constructor(x, y, vx, vy, color, life, size){
+    this.x = x; this.y = y;
+    this.vx = vx; this.vy = vy;
+    this.color = color;
+    this.life = life; this.maxLife = life;
+    this.size = size;
+  }
+  update(dt){
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.vy += 700 * dt;
+    this.life -= dt;
+  }
+  draw(ctx){
+    const a = Math.max(0, this.life / this.maxLife);
+    ctx.globalAlpha = a;
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+    ctx.globalAlpha = 1;
+  }
+}
+
+function spawnDust(x, y, n){
+  for(let i = 0; i < n; i++){
+    particles.push(new Particle(x, y, (Math.random()-.5)*120, -Math.random()*40 - 20, '#fff5e1', 0.45, 4));
+  }
+}
+function spawnSparkle(x, y, color){
+  for(let i = 0; i < 14; i++){
+    const a = Math.random() * Math.PI * 2;
+    const s = 80 + Math.random() * 120;
+    particles.push(new Particle(x, y, Math.cos(a) * s, Math.sin(a) * s - 60, color, 0.6, 4));
+  }
+}
+function spawnPoof(x, y){
+  for(let i = 0; i < 18; i++){
+    const a = Math.random() * Math.PI * 2;
+    const s = 50 + Math.random() * 130;
+    particles.push(new Particle(x, y, Math.cos(a) * s, Math.sin(a) * s - 30, ['#fff','#cfd5d8','#a4adb3'][i%3], 0.6, 5));
+  }
+}
+
+/* ---------- Drawing helpers ---------- */
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+/* drawCat(ctx, footX, footY, palette, id, facing, squashY, walk, onGround)
+   footX,footY is the center-bottom of the cat (where its feet rest) */
+function drawCat(ctx, footX, footY, pal, id, facing, squashY, walk, onGround){
+  ctx.save();
+  ctx.translate(footX, footY);
+  ctx.scale(facing, 1);
+  const sy = squashY;
+  const sx = 1 / Math.sqrt(squashY);
+  ctx.scale(sx, sy);
+
+  // Walk bobbing
+  const bob = onGround ? Math.sin(walk) * 1.2 : 0;
+  const legA = onGround ? Math.sin(walk) * 4 : 2;
+  const legB = onGround ? Math.sin(walk + Math.PI) * 4 : -2;
+
+  // Tail
+  ctx.strokeStyle = pal.body;
+  ctx.lineWidth = 4.5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(11, -10);
+  ctx.quadraticCurveTo(20, -16 + Math.sin(walk*0.5)*1.5, 17, -28);
+  ctx.stroke();
+  // Tail tip white for menta
+  if(id === 'menta'){
+    ctx.strokeStyle = pal.belly;
+    ctx.lineWidth = 4.5;
+    ctx.beginPath();
+    ctx.moveTo(17, -25);
+    ctx.lineTo(17, -28);
+    ctx.stroke();
+  }
+
+  // Legs (4 small legs - simple bars)
+  ctx.fillStyle = pal.body;
+  ctx.fillRect(-10, -7 + bob, 5, 7 + legA);
+  ctx.fillRect(-3, -7 + bob, 5, 7 + legB);
+  ctx.fillRect(2, -7 + bob, 5, 7 + legA);
+  ctx.fillRect(8, -7 + bob, 5, 7 + legB);
+  // Paws (white tips for menta)
+  if(id === 'menta'){
+    ctx.fillStyle = pal.belly;
+    ctx.fillRect(-10, -2 + legA + bob, 5, 3);
+    ctx.fillRect(-3, -2 + legB + bob, 5, 3);
+    ctx.fillRect(2, -2 + legA + bob, 5, 3);
+    ctx.fillRect(8, -2 + legB + bob, 5, 3);
+  }
+
+  // Body (rounded)
+  ctx.fillStyle = pal.body;
+  roundRect(ctx, -13, -22 + bob, 26, 18, 8);
+  ctx.fill();
+
+  // Belly oval
+  ctx.fillStyle = pal.belly;
+  roundRect(ctx, -8, -16 + bob, 16, 12, 6);
+  ctx.fill();
+
+  // Stripes / spots
+  ctx.fillStyle = pal.stripe;
+  if(id === 'soja'){
+    // Tabby stripes on back
+    ctx.fillRect(-11, -22 + bob, 2, 4);
+    ctx.fillRect(-6, -22 + bob, 2, 4);
+    ctx.fillRect(-1, -22 + bob, 2, 4);
+    ctx.fillRect(4, -22 + bob, 2, 4);
+    ctx.fillRect(9, -22 + bob, 2, 4);
+  } else {
+    // Black patches
+    roundRect(ctx, -12, -22 + bob, 8, 6, 3); ctx.fill();
+    roundRect(ctx, 5, -19 + bob, 8, 5, 3); ctx.fill();
+  }
+
+  // Head
+  const headY = -32 + bob;
+  ctx.fillStyle = pal.body;
+  ctx.beginPath();
+  ctx.arc(0, headY, 11, 0, Math.PI*2);
+  ctx.fill();
+
+  // Cheeks/chin lighter (white for menta)
+  ctx.fillStyle = pal.belly;
+  roundRect(ctx, -6, headY + 2, 12, 7, 4);
+  ctx.fill();
+
+  // Spots on head for menta
+  if(id === 'menta'){
+    ctx.fillStyle = pal.stripe;
+    roundRect(ctx, -10, headY - 6, 6, 6, 3); ctx.fill();
+  }
+
+  // Ears (triangles)
+  ctx.fillStyle = pal.body;
+  ctx.beginPath();
+  ctx.moveTo(-10, headY - 5);
+  ctx.lineTo(-12, headY - 14);
+  ctx.lineTo(-4, headY - 9);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(10, headY - 5);
+  ctx.lineTo(12, headY - 14);
+  ctx.lineTo(4, headY - 9);
+  ctx.closePath();
+  ctx.fill();
+  // Inner ears pink
+  ctx.fillStyle = pal.ear;
+  ctx.beginPath();
+  ctx.moveTo(-9, headY - 7);
+  ctx.lineTo(-10, headY - 12);
+  ctx.lineTo(-6, headY - 9);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(9, headY - 7);
+  ctx.lineTo(10, headY - 12);
+  ctx.lineTo(6, headY - 9);
+  ctx.closePath();
+  ctx.fill();
+
+  // Eyes
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(-4, headY - 1, 2.5, 0, Math.PI*2);
+  ctx.arc(4, headY - 1, 2.5, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = pal.eye;
+  ctx.beginPath();
+  ctx.arc(-4, headY - 1, 1.8, 0, Math.PI*2);
+  ctx.arc(4, headY - 1, 1.8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = pal.pupil;
+  ctx.beginPath();
+  ctx.arc(-3.5, headY - 1, 0.9, 0, Math.PI*2);
+  ctx.arc(4.5, headY - 1, 0.9, 0, Math.PI*2);
+  ctx.fill();
+  // Eye shine
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(-3.8, headY - 1.4, 0.5, 0, Math.PI*2);
+  ctx.arc(4.2, headY - 1.4, 0.5, 0, Math.PI*2);
+  ctx.fill();
+
+  // Nose
+  ctx.fillStyle = pal.nose;
+  ctx.beginPath();
+  ctx.moveTo(0, headY + 3);
+  ctx.lineTo(-2, headY + 1.5);
+  ctx.lineTo(2, headY + 1.5);
+  ctx.closePath();
+  ctx.fill();
+
+  // Mouth (small W)
+  ctx.strokeStyle = pal.pupil;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, headY + 3);
+  ctx.lineTo(0, headY + 5);
+  ctx.moveTo(0, headY + 5);
+  ctx.quadraticCurveTo(-2, headY + 6.5, -3, headY + 5);
+  ctx.moveTo(0, headY + 5);
+  ctx.quadraticCurveTo(2, headY + 6.5, 3, headY + 5);
+  ctx.stroke();
+
+  // Whiskers
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  ctx.moveTo(-11, headY + 3); ctx.lineTo(-5, headY + 3);
+  ctx.moveTo(-11, headY + 5); ctx.lineTo(-5, headY + 4.5);
+  ctx.moveTo(11, headY + 3); ctx.lineTo(5, headY + 3);
+  ctx.moveTo(11, headY + 5); ctx.lineTo(5, headY + 4.5);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawDog(ctx){
+  // Mid-grey/brown dog (centered at footX,footY = bottom-middle)
+  // Body
+  ctx.fillStyle = '#6b5232';
+  roundRect(ctx, -16, -22, 32, 16, 6);
+  ctx.fill();
+  // Belly
+  ctx.fillStyle = '#9d7a4d';
+  roundRect(ctx, -12, -14, 24, 8, 4);
+  ctx.fill();
+  // Legs
+  ctx.fillStyle = '#54401e';
+  ctx.fillRect(-13, -8, 5, 8);
+  ctx.fillRect(-5, -8, 5, 8);
+  ctx.fillRect(3, -8, 5, 8);
+  ctx.fillRect(11, -8, 5, 8);
+  // Tail
+  ctx.strokeStyle = '#6b5232';
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(15, -16);
+  ctx.lineTo(22, -22);
+  ctx.stroke();
+  // Head
+  ctx.fillStyle = '#6b5232';
+  roundRect(ctx, -22, -28, 14, 12, 5);
+  ctx.fill();
+  // Ear floppy
+  ctx.fillStyle = '#54401e';
+  roundRect(ctx, -21, -28, 5, 10, 2);
+  ctx.fill();
+  // Snout
+  ctx.fillStyle = '#9d7a4d';
+  roundRect(ctx, -28, -22, 8, 7, 3);
+  ctx.fill();
+  // Eye
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(-15, -24, 1.5, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#1a1a1a';
+  ctx.beginPath();
+  ctx.arc(-15, -24, 0.8, 0, Math.PI*2);
+  ctx.fill();
+  // Nose
+  ctx.fillStyle = '#1a1a1a';
+  ctx.beginPath();
+  ctx.arc(-27, -19, 1.5, 0, Math.PI*2);
+  ctx.fill();
+  // Mouth
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(-26, -16);
+  ctx.lineTo(-21, -16);
+  ctx.stroke();
+}
+
+function drawBird(ctx, flap){
+  // Body
+  ctx.fillStyle = '#3e3a52';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 13, 9, 0, 0, Math.PI*2);
+  ctx.fill();
+  // Belly
+  ctx.fillStyle = '#7a6e8a';
+  ctx.beginPath();
+  ctx.ellipse(0, 3, 8, 5, 0, 0, Math.PI*2);
+  ctx.fill();
+  // Tail (back of bird, since bird faces left by default in this drawing)
+  ctx.fillStyle = '#2c2740';
+  ctx.beginPath();
+  ctx.moveTo(10, 0);
+  ctx.lineTo(17, -5);
+  ctx.lineTo(17, 5);
+  ctx.closePath();
+  ctx.fill();
+  // Wings flapping
+  const wingY = Math.sin(flap) * 7;
+  ctx.fillStyle = '#2c2740';
+  ctx.beginPath();
+  ctx.moveTo(-2, -3);
+  ctx.lineTo(-12, wingY - 11);
+  ctx.lineTo(-2, wingY + 1);
+  ctx.lineTo(4, -2);
+  ctx.closePath();
+  ctx.fill();
+  // Head
+  ctx.fillStyle = '#3e3a52';
+  ctx.beginPath();
+  ctx.arc(-9, -3, 6, 0, Math.PI*2);
+  ctx.fill();
+  // Beak
+  ctx.fillStyle = '#fed16d';
+  ctx.beginPath();
+  ctx.moveTo(-15, -3);
+  ctx.lineTo(-22, -2);
+  ctx.lineTo(-15, -1);
+  ctx.closePath();
+  ctx.fill();
+  // Eye
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(-10, -5, 1.7, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#1a1a1a';
+  ctx.beginPath();
+  ctx.arc(-10, -5, 0.9, 0, Math.PI*2);
+  ctx.fill();
+  // Foot
+  ctx.strokeStyle = '#3a3340';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(-2, 8); ctx.lineTo(-2, 11);
+  ctx.moveTo(3, 8); ctx.lineTo(3, 11);
+  ctx.stroke();
+}
+
+function drawVacuum(ctx, spin, dir){
+  // body (centered)
+  ctx.fillStyle = '#444';
+  roundRect(ctx, -19, -10, 38, 18, 8);
+  ctx.fill();
+  // Top dome
+  ctx.fillStyle = '#777';
+  roundRect(ctx, -14, -14, 28, 8, 4);
+  ctx.fill();
+  // Sensor light
+  ctx.fillStyle = '#ff5050';
+  ctx.beginPath();
+  ctx.arc(0, -10, 2, 0, Math.PI*2);
+  ctx.fill();
+  // Wheels (rotating)
+  ctx.save();
+  ctx.translate(-12, 7);
+  ctx.rotate(spin * dir);
+  ctx.fillStyle = '#222';
+  ctx.beginPath();
+  ctx.arc(0, 0, 5, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#999';
+  ctx.fillRect(-1, -5, 2, 10);
+  ctx.restore();
+
+  ctx.save();
+  ctx.translate(12, 7);
+  ctx.rotate(spin * dir);
+  ctx.fillStyle = '#222';
+  ctx.beginPath();
+  ctx.arc(0, 0, 5, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#999';
+  ctx.fillRect(-1, -5, 2, 10);
+  ctx.restore();
+
+  // Mouth (suction) at front
+  ctx.fillStyle = '#1a1a1a';
+  if(dir > 0) roundRect(ctx, 14, 0, 8, 6, 2);
+  else roundRect(ctx, -22, 0, 8, 6, 2);
+  ctx.fill();
+}
+
+function drawFish(ctx, x, y, t, golden){
+  ctx.save();
+  ctx.translate(x, y + Math.sin(t * 3) * 3);
+  // Golden glow
+  if(golden){
+    ctx.fillStyle = 'rgba(255, 213, 79, .4)';
+    ctx.beginPath();
+    ctx.arc(0, 0, 18 + Math.sin(t*5)*2, 0, Math.PI*2);
+    ctx.fill();
+  }
+  const bodyColor = golden ? '#ffd54f' : '#ff9a43';
+  const stripeColor = golden ? '#b8860b' : '#c46420';
+  // Body
+  ctx.fillStyle = bodyColor;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 11, 7, 0, 0, Math.PI*2);
+  ctx.fill();
+  // Tail
+  ctx.beginPath();
+  ctx.moveTo(8, 0);
+  ctx.lineTo(15, -6);
+  ctx.lineTo(15, 6);
+  ctx.closePath();
+  ctx.fill();
+  // Eye
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(-5, -2, 1.8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#1a1a1a';
+  ctx.beginPath();
+  ctx.arc(-5, -2, 1, 0, Math.PI*2);
+  ctx.fill();
+  // Stripe
+  ctx.strokeStyle = stripeColor;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(-1, -5); ctx.lineTo(1, 5);
+  ctx.stroke();
+
+  // Sparkle (always for golden, sometimes for normal)
+  const sparkle = golden ? Math.sin(t * 6) > 0 : Math.sin(t * 4) > 0.7;
+  if(sparkle){
+    ctx.fillStyle = golden ? '#ffffff' : '#fff5b0';
+    ctx.fillRect(-1, -10, 1, 3);
+    ctx.fillRect(-2, -9, 3, 1);
+    if(golden){
+      ctx.fillRect(7, -7, 1, 2);
+      ctx.fillRect(6, -6, 3, 1);
+    }
+  }
+  ctx.restore();
+}
+
+function drawDoor(ctx, x, y, open, t){
+  ctx.save();
+  ctx.translate(x, y);
+  // Frame
+  ctx.fillStyle = '#5a3a1f';
+  roundRect(ctx, 0, 0, TILE, TILE * 2, 4);
+  ctx.fill();
+  // Inner
+  if(open){
+    // Open: glowing portal
+    const grd = ctx.createRadialGradient(TILE/2, TILE, 4, TILE/2, TILE, TILE);
+    grd.addColorStop(0, '#fff5b0');
+    grd.addColorStop(.5, '#ffd166');
+    grd.addColorStop(1, '#c79a3d');
+    ctx.fillStyle = grd;
+    roundRect(ctx, 4, 4, TILE - 8, TILE * 2 - 8, 4);
+    ctx.fill();
+    // Sparkles
+    for(let i = 0; i < 5; i++){
+      const sx = TILE/2 + Math.cos(t * 2 + i) * 10;
+      const sy = TILE + Math.sin(t * 3 + i) * 14;
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(sx, sy, 2, 2);
+    }
+  } else {
+    ctx.fillStyle = '#3a2510';
+    roundRect(ctx, 4, 4, TILE - 8, TILE * 2 - 8, 4);
+    ctx.fill();
+    // Lock symbol
+    ctx.fillStyle = '#5a3a1f';
+    ctx.beginPath();
+    ctx.arc(TILE/2, TILE * 0.85, 5, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#3a2510';
+    ctx.fillRect(TILE/2 - 1, TILE * 0.85, 2, 5);
+  }
+  // Doorknob
+  if(!open){
+    ctx.fillStyle = '#c79a3d';
+    ctx.beginPath();
+    ctx.arc(TILE - 8, TILE, 2, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawTile(ctx, c, r, t){
+  const x = c * TILE, y = r * TILE;
+  if(t === '#'){
+    // Solid block
+    ctx.fillStyle = '#5d4037';
+    ctx.fillRect(x, y, TILE, TILE);
+    ctx.fillStyle = '#3e2723';
+    ctx.fillRect(x, y + TILE - 4, TILE, 4);
+    ctx.fillStyle = '#7c5045';
+    ctx.fillRect(x + 2, y + 2, TILE - 4, 2);
+    // Subtle texture
+    ctx.fillStyle = 'rgba(0,0,0,.08)';
+    ctx.fillRect(x + 12, y + 14, 4, 4);
+    ctx.fillRect(x + 24, y + 22, 3, 3);
+  } else if(t === '='){
+    // Grass-topped solid
+    ctx.fillStyle = '#5d4037';
+    ctx.fillRect(x, y, TILE, TILE);
+    ctx.fillStyle = '#52b788';
+    ctx.fillRect(x, y, TILE, 8);
+    ctx.fillStyle = '#7fcfa1';
+    ctx.fillRect(x, y, TILE, 3);
+    // Tufts
+    ctx.fillStyle = '#52b788';
+    ctx.fillRect(x + 6, y - 2, 2, 4);
+    ctx.fillRect(x + 16, y - 2, 2, 4);
+    ctx.fillRect(x + 28, y - 2, 2, 4);
+  } else if(t === '-'){
+    // Wood plank one-way platform
+    ctx.fillStyle = '#a87444';
+    ctx.fillRect(x, y, TILE, 8);
+    ctx.fillStyle = '#8b5a2b';
+    ctx.fillRect(x, y + 6, TILE, 2);
+    ctx.fillStyle = '#6b4423';
+    ctx.fillRect(x + 4, y + 2, 1, 4);
+    ctx.fillRect(x + 18, y + 2, 1, 4);
+    ctx.fillRect(x + 32, y + 2, 1, 4);
+  } else if(t === '^'){
+    // Spikes on the floor (instant kill)
+    ctx.fillStyle = '#5d4037';
+    ctx.fillRect(x, y + TILE - 6, TILE, 6);
+    ctx.fillStyle = '#3e2723';
+    ctx.fillRect(x, y + TILE - 6, TILE, 1);
+    // 4 metal spikes
+    ctx.fillStyle = '#b3b3b3';
+    for(let i = 0; i < 4; i++){
+      const sx = x + 3 + i * 9;
+      ctx.beginPath();
+      ctx.moveTo(sx, y + TILE - 4);
+      ctx.lineTo(sx + 4, y + 6);
+      ctx.lineTo(sx + 8, y + TILE - 4);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // Highlights
+    ctx.fillStyle = '#dde0e3';
+    for(let i = 0; i < 4; i++){
+      const sx = x + 3 + i * 9;
+      ctx.beginPath();
+      ctx.moveTo(sx + 1, y + TILE - 6);
+      ctx.lineTo(sx + 4, y + 6);
+      ctx.lineTo(sx + 4, y + TILE - 6);
+      ctx.closePath();
+      ctx.fill();
+    }
+  } else if(t === 'S'){
+    // Spring (super jump)
+    ctx.fillStyle = '#4d4d4d';
+    ctx.fillRect(x + 4, y + TILE - 6, TILE - 8, 5);
+    ctx.fillStyle = '#666';
+    ctx.fillRect(x + 4, y + TILE - 6, TILE - 8, 1);
+    // Coil zigzag
+    ctx.strokeStyle = '#bbb';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x + 8, y + TILE - 7);
+    for(let i = 1; i < 6; i++){
+      const lx = x + (i % 2 === 1 ? TILE - 8 : 8);
+      ctx.lineTo(lx, y + TILE - 7 - i * 4);
+    }
+    ctx.stroke();
+    // Top plate (red)
+    ctx.fillStyle = '#a02633';
+    roundRect(ctx, x + 3, y + TILE - 32, TILE - 6, 5, 1); ctx.fill();
+    ctx.fillStyle = '#e63946';
+    roundRect(ctx, x + 3, y + TILE - 32, TILE - 6, 3, 1); ctx.fill();
+    ctx.fillStyle = '#ff7d8a';
+    ctx.fillRect(x + 5, y + TILE - 32, TILE - 10, 1);
+  }
+}
+
+/* ---------- Backgrounds ---------- */
+function drawBackground(ctx, bg){
+  if(bg === 'patio'){
+    const grd = ctx.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, '#74c0e8');
+    grd.addColorStop(1, '#b6e0f0');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+    // Sun
+    ctx.fillStyle = '#fff5b0';
+    ctx.beginPath();
+    ctx.arc(W - 90, 80, 36, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#ffd166';
+    ctx.beginPath();
+    ctx.arc(W - 90, 80, 28, 0, Math.PI*2);
+    ctx.fill();
+    drawClouds(ctx);
+  } else if(bg === 'cocina'){
+    const grd = ctx.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, '#fce8b8');
+    grd.addColorStop(1, '#e8c87f');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+    // Tile pattern
+    ctx.fillStyle = 'rgba(0,0,0,.05)';
+    for(let i = 0; i < W; i += 80){
+      for(let j = 0; j < H; j += 80){
+        ctx.fillRect(i, j, 40, 40);
+      }
+    }
+    // Window
+    ctx.fillStyle = '#a8d8e0';
+    ctx.fillRect(W - 200, 60, 130, 100);
+    ctx.strokeStyle = '#8b5a2b';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(W - 200, 60, 130, 100);
+    ctx.beginPath();
+    ctx.moveTo(W - 200, 110); ctx.lineTo(W - 70, 110);
+    ctx.moveTo(W - 135, 60); ctx.lineTo(W - 135, 160);
+    ctx.stroke();
+  } else if(bg === 'jardin'){
+    const grd = ctx.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, '#5fb8d8');
+    grd.addColorStop(.6, '#b8e0a8');
+    grd.addColorStop(1, '#7fb87f');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+    // Distant trees
+    for(let i = 0; i < 6; i++){
+      const tx = i * 170 + 40;
+      const ty = 280 + (i % 3) * 8;
+      ctx.fillStyle = '#3e8050';
+      ctx.beginPath();
+      ctx.arc(tx, ty, 28, 0, Math.PI*2);
+      ctx.arc(tx + 18, ty - 6, 22, 0, Math.PI*2);
+      ctx.arc(tx - 14, ty - 4, 22, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = '#5a3a1f';
+      ctx.fillRect(tx - 4, ty + 14, 8, 24);
+    }
+    drawClouds(ctx);
+  } else if(bg === 'sotano'){
+    const grd = ctx.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, '#3a2a4f');
+    grd.addColorStop(1, '#1a1024');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+    // Cobwebs/lights
+    ctx.fillStyle = 'rgba(255,209,102,.15)';
+    ctx.beginPath();
+    ctx.arc(120, 80, 80, 0, Math.PI*2);
+    ctx.arc(W - 120, 100, 70, 0, Math.PI*2);
+    ctx.fill();
+    // Hanging bulb
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(W/2, 0);
+    ctx.lineTo(W/2, 60);
+    ctx.stroke();
+    ctx.fillStyle = '#ffd166';
+    ctx.beginPath();
+    ctx.arc(W/2, 70, 8, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,209,102,.18)';
+    ctx.beginPath();
+    ctx.arc(W/2, 100, 60, 0, Math.PI*2);
+    ctx.fill();
+  } else if(bg === 'tejado'){
+    const grd = ctx.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, '#3d1e5e');
+    grd.addColorStop(.4, '#a04464');
+    grd.addColorStop(.7, '#ed8042');
+    grd.addColorStop(1, '#ffc580');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+    // Stars
+    drawStars(ctx);
+    // Moon
+    ctx.fillStyle = '#fff5e1';
+    ctx.beginPath();
+    ctx.arc(120, 80, 28, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,209,102,.3)';
+    ctx.beginPath();
+    ctx.arc(120, 80, 36, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+function drawClouds(ctx){
+  ctx.fillStyle = 'rgba(255,255,255,.7)';
+  for(const c of bgClouds){
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, 18, 0, Math.PI*2);
+    ctx.arc(c.x + 18, c.y + 4, 22, 0, Math.PI*2);
+    ctx.arc(c.x - 18, c.y + 4, 18, 0, Math.PI*2);
+    ctx.arc(c.x + 6, c.y - 8, 14, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+function drawStars(ctx){
+  ctx.fillStyle = '#fff5e1';
+  for(const s of bgStars){
+    const tw = (Math.sin(state.time * 2 + s.x) + 1) / 2;
+    ctx.globalAlpha = 0.5 + tw * 0.5;
+    ctx.fillRect(s.x, s.y, s.size, s.size);
+  }
+  ctx.globalAlpha = 1;
+}
+
+/* ---------- Level loading ---------- */
+function loadLevel(idx){
+  const lvl = LEVELS[idx];
+  tiles = [];
+  fishes = [];
+  enemies = [];
+  movingPlatforms = [];
+  exit = null;
+  particles = [];
+
+  let p1Spawn = null, p2Spawn = null;
+  for(let r = 0; r < lvl.layout.length; r++){
+    const row = lvl.layout[r];
+    const tilesRow = [];
+    for(let c = 0; c < COLS; c++){
+      const ch = row[c] || '.';
+      if(ch === '@'){ p1Spawn = { x: c * TILE + 4, y: r * TILE - 2 }; tilesRow.push('.'); }
+      else if(ch === '&'){ p2Spawn = { x: c * TILE + 4, y: r * TILE - 2 }; tilesRow.push('.'); }
+      else if(ch === 'F'){
+        fishes.push({ x: c * TILE + TILE/2, y: r * TILE + TILE/2, taken: false, golden: false });
+        tilesRow.push('.');
+      }
+      else if(ch === 'G'){
+        fishes.push({ x: c * TILE + TILE/2, y: r * TILE + TILE/2, taken: false, golden: true });
+        tilesRow.push('.');
+      }
+      else if(ch === 'D'){
+        enemies.push(new Dog(c * TILE + 2, r * TILE + 10));
+        tilesRow.push('.');
+      }
+      else if(ch === 'V'){
+        enemies.push(new Vacuum(c * TILE + 1, r * TILE + 12));
+        tilesRow.push('.');
+      }
+      else if(ch === 'B'){
+        enemies.push(new Bird(c * TILE, r * TILE + 4));
+        tilesRow.push('.');
+      }
+      else if(ch === 'M'){
+        movingPlatforms.push(new MovingPlatform(c * TILE, r * TILE + (TILE - 14), 'h', TILE * 2.5));
+        tilesRow.push('.');
+      }
+      else if(ch === 'N'){
+        movingPlatforms.push(new MovingPlatform(c * TILE, r * TILE + (TILE - 14), 'v', TILE * 2));
+        tilesRow.push('.');
+      }
+      else if(ch === 'E'){
+        exit = { x: c * TILE, y: r * TILE - TILE, w: TILE, h: TILE * 2, open: false };
+        tilesRow.push('.');
+      }
+      else tilesRow.push(ch);   // includes '.', '#', '=', '-', '^', 'S'
+    }
+    tiles.push(tilesRow);
+  }
+  // Pad rows up to ROWS
+  while(tiles.length < ROWS){ tiles.push(Array(COLS).fill('.')); }
+
+  // Spawn players
+  if(!p1Spawn) p1Spawn = { x: 40, y: 200 };
+  if(!p2Spawn) p2Spawn = { x: 80, y: 200 };
+  players = [
+    new Player('soja', p1Spawn.x, p1Spawn.y),
+    new Player('menta', p2Spawn.x, p2Spawn.y)
+  ];
+
+  state.fishCollected = 0;
+  state.totalFish = fishes.length;
+  state.bothInExit = 0;
+  state.shake = 0;
+
+  // Setup background scenery
+  bgClouds = [];
+  for(let i = 0; i < 4; i++){
+    bgClouds.push({ x: 60 + i * 230, y: 50 + (i % 2) * 30 });
+  }
+  bgStars = [];
+  if(lvl.bg === 'tejado'){
+    for(let i = 0; i < 70; i++){
+      bgStars.push({ x: Math.random() * W, y: Math.random() * H * 0.5, size: Math.random() < 0.7 ? 1 : 2 });
+    }
+  }
+
+  updateHUD();
+}
+
+function updateHUD(){
+  document.getElementById('hud-lives').textContent = state.lives;
+  document.getElementById('hud-fish').textContent = state.fishCollected + '/' + state.totalFish;
+  document.getElementById('hud-level').textContent = (state.levelIdx + 1) + '. ' + LEVELS[state.levelIdx].name;
+}
+
+/* ---------- Game logic ---------- */
+function onPlayerDeath(p){
+  state.lives--;
+  state.shake = 0.4;
+  spawnPoof(p.x + p.w/2, p.y + p.h/2);
+  updateHUD();
+  if(state.lives <= 0){
+    state.scene = 'gameOver';
+    showOverlay('Game Over', 'Los gatos se cansaron. ¿Otra?', 'fishStat', 'ESPACIO para intentar de nuevo');
+  } else {
+    // Reload level (keep total game fish count, reset level fish)
+    loadLevel(state.levelIdx);
+  }
+}
+
+function nextLevel(){
+  state.levelIdx++;
+  if(state.levelIdx >= LEVELS.length){
+    state.scene = 'gameComplete';
+    showOverlay('¡LO LOGRARON!', 'Soja y Menta llegaron juntos al último tejado. 🌟', 'finalStat', 'ESPACIO para volver a jugar');
+  } else {
+    loadLevel(state.levelIdx);
+    state.scene = 'playing';
+    hideOverlay();
+  }
+}
+
+function checkCollisions(){
+  // Fish
+  for(const f of fishes){
+    if(f.taken) continue;
+    for(const p of players){
+      const dx = (p.x + p.w/2) - f.x;
+      const dy = (p.y + p.h/2) - f.y;
+      if(Math.abs(dx) < 18 && Math.abs(dy) < 18){
+        f.taken = true;
+        state.fishCollected++;
+        // Golden fish counts as 3 toward the running game total but as 1 for level requirement
+        state.totalFishGame += f.golden ? 3 : 1;
+        spawnSparkle(f.x, f.y, f.golden ? '#fff2b0' : '#ffd166');
+        if(f.golden) spawnSparkle(f.x, f.y, '#fff');
+        updateHUD();
+        break;
+      }
+    }
+  }
+  // Enemies
+  for(const e of enemies){
+    if(!e.alive) continue;
+    for(const p of players){
+      if(p.invuln > 0) continue;
+      const overlap = !(p.x + p.w < e.x || p.x > e.x + e.w || p.y + p.h < e.y || p.y > e.y + e.h);
+      if(overlap){
+        // Defeated by jumping on top? Works for any non-bird stompable enemy.
+        // Birds can also be stomped if hit from above.
+        const stomp = p.vy > 50 && (p.y + p.h - e.y) < 22;
+        if(stomp){
+          e.alive = false;
+          p.vy = JUMP_VEL * 0.7;
+          spawnPoof(e.x + e.w/2, e.y + e.h/2);
+        } else {
+          // Hit player
+          p.invuln = 1.4;
+          p.vy = -300;
+          p.vx = -p.facing * 200;
+          state.shake = 0.25;
+          state.lives--;
+          updateHUD();
+          if(state.lives <= 0){
+            state.scene = 'gameOver';
+            showOverlay('Game Over', 'Los gatos se cansaron. ¿Otra?', 'fishStat', 'ESPACIO para intentar de nuevo');
+          }
+        }
+      }
+    }
+  }
+  // Exit
+  if(exit){
+    exit.open = state.fishCollected >= state.totalFish;
+    if(exit.open){
+      let bothIn = true;
+      for(const p of players){
+        const overlap = !(p.x + p.w < exit.x || p.x > exit.x + exit.w || p.y + p.h < exit.y || p.y > exit.y + exit.h);
+        p.atExit = overlap;
+        if(!overlap) bothIn = false;
+      }
+      if(bothIn){
+        state.bothInExit += 1/60;
+        if(state.bothInExit > 0.4){
+          state.scene = 'levelComplete';
+          showOverlay('¡Nivel completado!', LEVELS[state.levelIdx].name + ' superado', 'levelStat', 'ESPACIO para seguir');
+        }
+      } else {
+        state.bothInExit = 0;
+      }
+    }
+  }
+}
+
+/* ---------- Game loop ---------- */
+let lastT = 0;
+function loop(t){
+  const dt = Math.min(0.05, (t - lastT) / 1000) || 0;
+  lastT = t;
+  state.time += dt;
+
+  if(state.scene === 'playing'){
+    update(dt);
+  }
+  render();
+  requestAnimationFrame(loop);
+}
+
+function update(dt){
+  // Update moving platforms BEFORE players, so player carry uses the new positions
+  for(const mp of movingPlatforms) mp.update(dt);
+  for(const p of players) p.update(dt);
+  for(const e of enemies) e.update(dt);
+  for(const part of particles) part.update(dt);
+  particles = particles.filter(p => p.life > 0);
+
+  checkCollisions();
+
+  if(state.shake > 0) state.shake -= dt;
+
+  // Cloud drift
+  for(const c of bgClouds){
+    c.x += dt * 6;
+    if(c.x > W + 60) c.x = -60;
+  }
+}
+
+function render(){
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  ctx.save();
+  if(state.shake > 0){
+    ctx.translate((Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8);
+  }
+
+  // Background
+  drawBackground(ctx, LEVELS[state.levelIdx].bg);
+
+  // Tiles
+  for(let r = 0; r < ROWS; r++){
+    for(let c = 0; c < COLS; c++){
+      drawTile(ctx, c, r, tiles[r][c]);
+    }
+  }
+
+  // Exit
+  if(exit) drawDoor(ctx, exit.x, exit.y, exit.open, state.time);
+
+  // Moving platforms (drawn under enemies/players)
+  for(const mp of movingPlatforms) mp.draw(ctx);
+
+  // Fishes
+  for(const f of fishes){
+    if(!f.taken) drawFish(ctx, f.x, f.y, state.time, f.golden);
+  }
+
+  // Enemies
+  for(const e of enemies) e.draw(ctx);
+
+  // Players
+  for(const p of players) p.draw(ctx);
+
+  // Particles
+  for(const part of particles) part.draw(ctx);
+
+  ctx.restore();
+}
+
+/* ---------- Overlays ---------- */
+function showOverlay(title, text, extra, prompt){
+  const ov = document.getElementById('overlay');
+  document.getElementById('overlay-title').textContent = title;
+  document.getElementById('overlay-text').textContent = text;
+  document.getElementById('overlay-prompt').textContent = prompt;
+
+  const ex = document.getElementById('overlay-extra');
+  ex.innerHTML = '';
+  if(extra === 'fishStat'){
+    ex.innerHTML = `<div class="stat">🐟 ${state.totalFishGame} pescaditos</div>`;
+  } else if(extra === 'levelStat'){
+    ex.innerHTML = `<div class="stat">🐟 ${state.fishCollected} / ${state.totalFish} en este nivel</div>`;
+  } else if(extra === 'finalStat'){
+    ex.innerHTML = `<div class="stat">🌟 ${state.totalFishGame} pescaditos en total</div>`;
+  } else if(extra === 'menu'){
+    ex.innerHTML = `
+      <div class="cat-row">
+        <div class="cat-card soja">
+          <canvas id="menu-soja" width="80" height="80"></canvas>
+          <div class="nm">SOJA</div>
+        </div>
+        <div class="cat-card menta">
+          <canvas id="menu-menta" width="80" height="80"></canvas>
+          <div class="nm">MENTA</div>
+        </div>
+      </div>
+    `;
+    setTimeout(()=>{
+      drawMenuCat('menu-soja', 'soja');
+      drawMenuCat('menu-menta', 'menta');
+    }, 0);
+  }
+  ov.classList.add('show');
+}
+function hideOverlay(){
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function drawMenuCat(canvasId, id){
+  const c = document.getElementById(canvasId);
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, c.width, c.height);
+  ctx.save();
+  ctx.scale(2, 2);
+  drawCat(ctx, c.width/4, c.height/4 + 24, PALETTES[id], id, 1, 1, 0, true);
+  ctx.restore();
+}
+
+/* ---------- Start ---------- */
+function startGame(){
+  state.lives = 3;
+  state.levelIdx = 0;
+  state.totalFishGame = 0;
+  loadLevel(0);
+  state.scene = 'playing';
+  hideOverlay();
+}
+
+/* ---------- Init ---------- */
+document.getElementById('pause-btn').addEventListener('click', () => {
+  if(state.scene === 'playing'){
+    state.scene = 'paused';
+    showOverlay('Pausado', 'Tomate un mate, esperamos.', '', 'P para seguir');
+  } else if(state.scene === 'paused'){
+    state.scene = 'playing';
+    hideOverlay();
+  }
+});
+document.getElementById('restart-btn').addEventListener('click', () => {
+  if(state.scene === 'playing' || state.scene === 'paused'){
+    loadLevel(state.levelIdx);
+    state.scene = 'playing';
+    hideOverlay();
+  }
+});
+
+// Initial menu
+loadLevel(0);
+showOverlay('SOJA & MENTA', 'Junten todos los pescaditos 🐟 y lleguen los dos a la puerta dorada para pasar de nivel.', 'menu', 'ESPACIO para empezar');
+
+// Mini cats next to the controls (decoration)
+function drawMiniCat(canvasId, id){
+  const c = document.getElementById(canvasId);
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, c.width, c.height);
+  ctx.save();
+  ctx.scale(1.4, 1.4);
+  drawCat(ctx, c.width/2.8, c.height/2.8 + 20, PALETTES[id], id, 1, 1, 0, true);
+  ctx.restore();
+}
+drawMiniCat('cat-soja-mini', 'soja');
+drawMiniCat('cat-menta-mini', 'menta');
+
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

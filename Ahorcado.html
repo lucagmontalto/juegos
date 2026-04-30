@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎯 Ahorcado — Luca vs Agus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Permanent+Marker&family=Caveat:wght@500;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --chalkboard:#2d4a3e;
+    --chalkboard-dark:#1a3030;
+    --chalkboard-light:#3d5a4e;
+    --wood:#a87444;
+    --wood-mid:#8b5a2b;
+    --wood-dark:#5a3d1a;
+    --chalk:#f5f0e8;
+    --chalk-dim:rgba(245,240,232,.6);
+    --chalk-yellow:#fdd870;
+    --chalk-red:#ff8c8c;
+    --chalk-pink:#ffb3d1;
+    --chalk-green:#a5d97f;
+    --chalk-blue:#9bd0e8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{ min-height:100%; }
+
+  body{
+    font-family:'Patrick Hand', cursive;
+    color:var(--chalk);
+    padding:18px 14px 50px;
+    background:
+      repeating-linear-gradient(90deg,
+        rgba(0,0,0,.18) 0, rgba(0,0,0,.18) 1px,
+        transparent 1px, transparent 4px),
+      repeating-linear-gradient(90deg,
+        rgba(255,255,255,.025) 0, rgba(255,255,255,.025) 2px,
+        transparent 2px, transparent 60px),
+      radial-gradient(ellipse at 30% 20%, #b88554 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 80%, #4a2810 0%, transparent 60%),
+      linear-gradient(180deg, #8b5a2b 0%, #5a3d1a 100%);
+    background-attachment: fixed;
+    overflow-x:hidden;
+  }
+  .app{ max-width:1100px; margin:0 auto; }
+
+  /* Header */
+  .header{ text-align:center; margin-bottom:14px; }
+  .header h1{
+    font-family:'Permanent Marker', cursive;
+    font-size:clamp(34px, 6vw, 58px);
+    color:var(--chalk);
+    text-shadow:3px 3px 0 var(--wood-dark), 5px 5px 12px rgba(0,0,0,.55);
+    letter-spacing:3px;
+    line-height:1.05;
+  }
+  .header .sub{
+    font-family:'Caveat', cursive;
+    font-size:clamp(18px, 2.4vw, 26px);
+    color:#f0d6b3;
+    margin-top:2px;
+    font-style:italic;
+  }
+
+  /* Topbar */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    flex-wrap:wrap;
+    background:
+      repeating-linear-gradient(90deg, rgba(0,0,0,.08) 0, rgba(0,0,0,.08) 1px, transparent 1px, transparent 5px),
+      linear-gradient(180deg, var(--wood) 0%, var(--wood-mid) 100%);
+    border:3px solid var(--wood-dark);
+    border-radius:14px;
+    padding:10px 18px;
+    margin-bottom:18px;
+    box-shadow:0 6px 16px rgba(0,0,0,.35);
+  }
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 14px;
+    border-radius:99px;
+    font-family:'Patrick Hand';
+    font-size:18px;
+    background:var(--chalkboard);
+    color:var(--chalk);
+    border:2px solid var(--chalkboard-dark);
+  }
+  .pill.score{ font-family:'Permanent Marker'; letter-spacing:1px; }
+  .pill.score .l{ color:var(--chalk-yellow); }
+  .pill.score .a{ color:var(--chalk-blue); }
+  .pill.score .sep{ color:var(--chalk-dim); margin:0 4px; }
+  .icon-btn{
+    background:var(--chalkboard);
+    border:2px solid var(--chalkboard-dark);
+    color:var(--chalk);
+    border-radius:50%;
+    width:42px; height:42px;
+    font-size:18px;
+    cursor:pointer;
+    transition:transform .15s;
+  }
+  .icon-btn:hover{ transform:rotate(20deg); }
+
+  /* Board (the chalkboard card) */
+  .board{
+    background:
+      radial-gradient(ellipse at 20% 15%, rgba(255,255,255,.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 85%, rgba(255,255,255,.03) 0%, transparent 55%),
+      repeating-linear-gradient(45deg,
+        rgba(255,255,255,.012) 0, rgba(255,255,255,.012) 1px,
+        transparent 1px, transparent 12px),
+      linear-gradient(135deg, var(--chalkboard) 0%, var(--chalkboard-dark) 100%);
+    border:14px solid;
+    border-image: linear-gradient(135deg, var(--wood) 0%, var(--wood-dark) 100%) 1;
+    border-radius:8px;
+    padding:28px 24px 30px;
+    box-shadow:
+      0 14px 36px rgba(0,0,0,.55),
+      inset 0 0 60px rgba(0,0,0,.45),
+      inset 0 0 6px rgba(255,255,255,.05);
+    margin-bottom:22px;
+    position:relative;
+  }
+  .board::before{
+    /* Chalk dust */
+    content:'';
+    position:absolute;
+    bottom:-1px; left:0; right:0;
+    height:8px;
+    background:repeating-linear-gradient(90deg,
+      rgba(245,240,232,.15) 0, rgba(245,240,232,.15) 2px,
+      transparent 2px, transparent 8px);
+    pointer-events:none;
+  }
+
+  /* Setup phase */
+  .setup-title{
+    font-family:'Permanent Marker';
+    text-align:center;
+    font-size:clamp(22px, 3.6vw, 32px);
+    color:var(--chalk-yellow);
+    margin-bottom:18px;
+    text-shadow:2px 2px 0 rgba(0,0,0,.3);
+    letter-spacing:2px;
+  }
+  .seg{
+    display:inline-flex;
+    background:var(--chalkboard-dark);
+    border:2px solid var(--chalkboard-light);
+    border-radius:99px;
+    padding:3px;
+    margin:0 auto 18px;
+  }
+  .seg-wrap{ text-align:center; }
+  .seg button{
+    border:none;
+    background:transparent;
+    padding:8px 18px;
+    font-family:'Patrick Hand';
+    font-size:18px;
+    color:var(--chalk-dim);
+    cursor:pointer;
+    border-radius:99px;
+  }
+  .seg button.active{
+    background:var(--chalk);
+    color:var(--chalkboard-dark);
+    font-weight:700;
+  }
+
+  .field{ margin-bottom:16px; }
+  .field-label{
+    display:block;
+    font-family:'Caveat';
+    font-size:20px;
+    color:var(--chalk-yellow);
+    margin-bottom:4px;
+    letter-spacing:1px;
+  }
+  .field input[type="text"], .field input[type="password"], .field select{
+    width:100%;
+    padding:12px 16px;
+    background:rgba(245,240,232,.08);
+    border:2px dashed rgba(245,240,232,.4);
+    border-radius:10px;
+    color:var(--chalk);
+    font-family:'Patrick Hand';
+    font-size:22px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+  }
+  .field input:focus, .field select:focus{
+    outline:none;
+    border-color:var(--chalk-yellow);
+    background:rgba(245,240,232,.12);
+  }
+  .field input::placeholder{ color:var(--chalk-dim); }
+  .field select{
+    appearance:none;
+    background-image:linear-gradient(45deg, transparent 50%, var(--chalk) 50%),
+                     linear-gradient(135deg, var(--chalk) 50%, transparent 50%);
+    background-position:calc(100% - 18px) 50%, calc(100% - 12px) 50%;
+    background-size:6px 6px, 6px 6px;
+    background-repeat:no-repeat;
+    padding-right:36px;
+    cursor:pointer;
+  }
+
+  .word-preview{
+    background:rgba(245,240,232,.06);
+    border:2px dashed var(--chalk-yellow);
+    border-radius:10px;
+    padding:14px;
+    text-align:center;
+    margin-bottom:14px;
+    font-family:'Permanent Marker';
+    font-size:28px;
+    color:var(--chalk-yellow);
+    letter-spacing:6px;
+    min-height:60px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+  .word-preview .blur{
+    filter: blur(8px);
+    user-select:none;
+  }
+  .word-preview .toggle{
+    position:absolute;
+    right:10px; top:10px;
+    background:transparent;
+    border:none;
+    cursor:pointer;
+    color:var(--chalk-yellow);
+    font-size:22px;
+  }
+  .word-preview.empty{ color:var(--chalk-dim); font-size:18px; letter-spacing:1px; font-family:'Patrick Hand'; }
+
+  /* Buttons */
+  .btn{
+    font-family:'Permanent Marker';
+    font-size:18px;
+    padding:12px 24px;
+    border-radius:99px;
+    border:3px solid var(--chalkboard-dark);
+    cursor:pointer;
+    letter-spacing:2px;
+    color:var(--chalkboard-dark);
+    background:var(--chalk);
+    transition: transform .1s, box-shadow .15s;
+    box-shadow:0 5px 0 var(--chalkboard-dark), 0 7px 16px rgba(0,0,0,.35);
+  }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 7px 0 var(--chalkboard-dark), 0 10px 20px rgba(0,0,0,.4); }
+  .btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--chalkboard-dark), 0 3px 6px rgba(0,0,0,.3); }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .btn.primary{ background:var(--chalk-yellow); }
+  .btn.go{ background:var(--chalk-green); }
+  .btn.danger{ background:var(--chalk-red); }
+  .btn.ghost{
+    background:transparent;
+    color:var(--chalk-dim);
+    border:2px dashed var(--chalk-dim);
+    box-shadow:none;
+  }
+  .btn.ghost:hover{ color:var(--chalk); border-color:var(--chalk); transform:none; box-shadow:none; }
+  .btn.tiny{ font-size:14px; padding:8px 16px; box-shadow:0 3px 0 var(--chalkboard-dark); }
+
+  .actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:14px;
+  }
+
+  /* Handover (transition between writer and guesser) */
+  .handover{
+    text-align:center;
+    padding:30px 0;
+  }
+  .handover .icon{ font-size:80px; margin-bottom:10px; }
+  .handover h2{
+    font-family:'Permanent Marker';
+    color:var(--chalk-yellow);
+    font-size:clamp(26px, 4vw, 38px);
+    letter-spacing:2px;
+    margin-bottom:10px;
+  }
+  .handover p{
+    font-size:20px;
+    color:var(--chalk-dim);
+    max-width:480px;
+    margin:0 auto 18px;
+  }
+
+  /* Play phase */
+  .play-grid{
+    display:grid;
+    grid-template-columns: minmax(220px, 1fr) 2fr;
+    gap:24px;
+    align-items:start;
+  }
+  @media (max-width:760px){
+    .play-grid{ grid-template-columns:1fr; }
+  }
+
+  .hangman-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+  }
+  .hangman{
+    width:100%;
+    max-width:240px;
+    height:auto;
+    aspect-ratio: 4/5;
+    filter: drop-shadow(0 0 1px rgba(245,240,232,.2));
+  }
+  .hangman line, .hangman circle{
+    stroke: var(--chalk);
+    stroke-width: 4;
+    stroke-linecap: round;
+    fill: none;
+  }
+  .hangman .gallows{ stroke: #d4cdb6; opacity:.85; }
+  .hangman .part{
+    opacity: 0;
+    transition: opacity .35s ease;
+    stroke-width: 4.5;
+  }
+  .hangman .part.show{ opacity: 1; }
+  .hangman .part.dying{ stroke: var(--chalk-red); animation: shake .35s; }
+  @keyframes shake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-3px)} 75%{transform:translateX(3px)} }
+
+  .lives{
+    font-family:'Permanent Marker';
+    font-size:18px;
+    letter-spacing:2px;
+    color:var(--chalk);
+  }
+  .lives .num{ color:var(--chalk-red); }
+  .lives.safe .num{ color:var(--chalk-green); }
+
+  /* Word display */
+  .play-right{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .hint-box{
+    background:rgba(245,240,232,.06);
+    border:2px dashed var(--chalk-yellow);
+    border-radius:10px;
+    padding:10px 14px;
+    color:var(--chalk-yellow);
+    font-family:'Caveat';
+    font-size:22px;
+    text-align:center;
+    letter-spacing:1px;
+  }
+  .hint-box.empty{ color:var(--chalk-dim); border-color:var(--chalk-dim); font-style:italic; }
+
+  .word-display{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    padding:16px 8px;
+    background:rgba(0,0,0,.18);
+    border-radius:12px;
+    border:1px dashed rgba(245,240,232,.2);
+  }
+  .word-letter{
+    width:44px; height:54px;
+    border-bottom:3px solid var(--chalk);
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    padding-bottom:4px;
+    font-family:'Permanent Marker';
+    font-size:32px;
+    color:var(--chalk-yellow);
+    text-shadow:2px 2px 0 rgba(0,0,0,.4);
+  }
+  .word-letter.space{ border-bottom:none; width:18px; }
+  .word-letter.just-revealed{ animation: revealPop .4s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes revealPop{
+    0%{ transform: scale(0); }
+    60%{ transform: scale(1.3) rotate(8deg); }
+    100%{ transform: scale(1); }
+  }
+
+  /* Keyboard */
+  .keyboard{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    align-items:center;
+  }
+  .kbd-row{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .kbd-key{
+    width:44px; height:48px;
+    border-radius:8px;
+    background:rgba(245,240,232,.08);
+    border:2px solid var(--chalk);
+    color:var(--chalk);
+    font-family:'Permanent Marker';
+    font-size:20px;
+    cursor:pointer;
+    transition: all .15s;
+  }
+  .kbd-key:hover:not(:disabled){ background:rgba(245,240,232,.18); transform:translateY(-2px); }
+  .kbd-key:disabled{ cursor:not-allowed; }
+  .kbd-key.right{
+    background:var(--chalk-green);
+    color:var(--chalkboard-dark);
+    border-color:var(--chalk-green);
+  }
+  .kbd-key.wrong{
+    background:transparent;
+    color:var(--chalk-red);
+    border-color:var(--chalk-red);
+    text-decoration:line-through;
+    opacity:.6;
+  }
+  @media (max-width:520px){
+    .kbd-key{ width:34px; height:40px; font-size:16px; }
+    .word-letter{ width:34px; height:44px; font-size:24px; }
+  }
+
+  /* Result phase */
+  .result{
+    text-align:center;
+    padding:24px 0;
+  }
+  .result .big-icon{ font-size:90px; line-height:1; margin-bottom:8px; animation: pop .55s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes pop{
+    0%{ transform: scale(.2); opacity:0; }
+    60%{ transform: scale(1.2); opacity:1; }
+    100%{ transform: scale(1); opacity:1; }
+  }
+  .result h2{
+    font-family:'Permanent Marker';
+    font-size:clamp(28px, 4.5vw, 42px);
+    letter-spacing:2px;
+    margin-bottom:8px;
+  }
+  .result h2.win{ color:var(--chalk-green); }
+  .result h2.lose{ color:var(--chalk-red); }
+  .result .word-was{
+    font-family:'Caveat';
+    font-size:24px;
+    color:var(--chalk-dim);
+    margin-bottom:6px;
+  }
+  .result .word-final{
+    font-family:'Permanent Marker';
+    font-size:38px;
+    letter-spacing:6px;
+    color:var(--chalk-yellow);
+    margin-bottom:14px;
+  }
+
+  /* History */
+  .history-section{
+    background:rgba(0,0,0,.25);
+    border:1px dashed rgba(245,240,232,.2);
+    border-radius:14px;
+    padding:18px;
+  }
+  .history-section h2{
+    font-family:'Permanent Marker';
+    color:var(--chalk-yellow);
+    font-size:22px;
+    margin-bottom:12px;
+    letter-spacing:2px;
+    text-align:center;
+  }
+  .history-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    max-height:280px;
+    overflow-y:auto;
+  }
+  .history-list::-webkit-scrollbar{ width:6px; }
+  .history-list::-webkit-scrollbar-thumb{ background:rgba(245,240,232,.3); border-radius:3px; }
+  .h-row{
+    display:grid;
+    grid-template-columns: 50px 1fr 60px 80px;
+    gap:10px;
+    align-items:center;
+    background:rgba(245,240,232,.05);
+    border-radius:8px;
+    padding:8px 12px;
+    font-size:16px;
+  }
+  .h-row .num{ color:var(--chalk-dim); font-family:'Permanent Marker'; }
+  .h-row .word{ font-family:'Permanent Marker'; letter-spacing:2px; color:var(--chalk-yellow); }
+  .h-row .res{ font-family:'Caveat'; }
+  .h-row .res.win{ color:var(--chalk-green); }
+  .h-row .res.lose{ color:var(--chalk-red); }
+  .h-row .who{ color:var(--chalk-dim); font-size:14px; text-align:right; }
+  .h-empty{ text-align:center; color:var(--chalk-dim); font-style:italic; padding:14px; }
+
+  /* Modal (settings) */
+  .modal{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.7);
+    display:none;
+    align-items:flex-start;
+    justify-content:center;
+    padding:30px 16px;
+    overflow-y:auto;
+    z-index:100;
+    backdrop-filter:blur(2px);
+  }
+  .modal.show{ display:flex; }
+  .modal-content{
+    background:linear-gradient(135deg, var(--chalkboard) 0%, var(--chalkboard-dark) 100%);
+    border:10px solid var(--wood-mid);
+    border-radius:8px;
+    width:100%; max-width:520px;
+    padding:22px;
+    color:var(--chalk);
+    position:relative;
+  }
+  .modal-content h2{
+    font-family:'Permanent Marker';
+    color:var(--chalk-yellow);
+    margin-bottom:14px;
+    letter-spacing:2px;
+  }
+  .modal .close-btn{
+    position:absolute; top:8px; right:8px;
+    width:32px; height:32px;
+    border:2px solid var(--chalk);
+    background:transparent;
+    color:var(--chalk);
+    border-radius:50%;
+    font-size:14px;
+    cursor:pointer;
+  }
+
+  /* Toast */
+  .toast{
+    position:fixed;
+    top:24px; left:50%;
+    transform:translateX(-50%) translateY(-120px);
+    background:var(--chalk);
+    color:var(--chalkboard-dark);
+    padding:10px 20px;
+    border-radius:99px;
+    font-family:'Permanent Marker';
+    letter-spacing:1px;
+    z-index:300;
+    transition:transform .3s cubic-bezier(.2,.9,.4,1.1);
+    box-shadow:0 12px 24px rgba(0,0,0,.4);
+  }
+  .toast.show{ transform:translateX(-50%) translateY(0); }
+
+  /* Confetti */
+  .confetti-piece{
+    position:fixed;
+    width:10px; height:14px;
+    top:-20px;
+    z-index:250;
+    animation: fall 2.6s ease-in forwards;
+    pointer-events:none;
+  }
+  @keyframes fall{
+    0%{ transform: translateY(0) rotate(0); opacity:1; }
+    100%{ transform: translateY(110vh) rotate(720deg); opacity:.3; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="header">
+    <h1>🎯 AHORCADO</h1>
+    <p class="sub">— Luca vs Agus, en el pizarrón —</p>
+  </header>
+
+  <div class="topbar">
+    <span class="pill">📜 Ronda <span id="round-num">1</span></span>
+    <span class="pill score">
+      <span class="l" id="luca-name-top">Luca</span>
+      <span id="luca-pts-top">0</span>
+      <span class="sep">·</span>
+      <span id="agus-pts-top">0</span>
+      <span class="a" id="agus-name-top">Agus</span>
+    </span>
+    <button class="icon-btn" id="settings-btn" title="Ajustes">⚙️</button>
+  </div>
+
+  <main class="board" id="board"></main>
+
+  <section class="history-section">
+    <h2>📋 Historial de rondas</h2>
+    <div class="history-list" id="history-list"></div>
+  </section>
+
+</div>
+
+<!-- Settings -->
+<div class="modal" id="settings-modal">
+  <div class="modal-content">
+    <button class="close-btn" id="settings-close">✕</button>
+    <h2>⚙️ AJUSTES</h2>
+
+    <div class="field">
+      <label class="field-label">Nombres</label>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="name-luca" placeholder="Luca">
+        <input type="text" id="name-agus" placeholder="Agus">
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Vidas (errores permitidos)</label>
+      <div class="seg-wrap">
+        <div class="seg" id="lives-seg">
+          <button data-n="6">6</button>
+          <button data-n="8">8</button>
+          <button data-n="10">10</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Cambio de roles</label>
+      <div class="seg-wrap">
+        <div class="seg" id="rotate-seg">
+          <button data-r="alt">alternar</button>
+          <button data-r="loser">pierde-escribe</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions" style="justify-content:flex-start; gap:8px; margin-top:18px;">
+      <button class="btn ghost tiny" id="clear-history">borrar historial</button>
+      <button class="btn ghost tiny" id="reset-all" style="border-color:var(--chalk-red); color:var(--chalk-red);">reiniciar todo</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   AHORCADO — Luca vs Agus
+   ========================================================= */
+const STORAGE_KEY = 'ahorcado-luca-agus-v1';
+
+const WORD_BANK = {
+  animales: { label:'🐘 Animales', words:[
+    'ELEFANTE','JIRAFA','PINGUINO','COCODRILO','MARIPOSA','MURCIELAGO',
+    'TIBURON','RINOCERONTE','CABALLO','GORILA','LEOPARDO','FLAMENCO',
+    'PULPO','OSO','LEON','TIGRE','OVEJA','CABRA','GALLINA','HORMIGA',
+    'CALAMAR','CIGUEÑA','LAGARTO','CAMELLO','PANTERA','DELFIN','BALLENA',
+    'ZORRO','ARDILLA','BUITRE','CUERVO','HALCON','PALOMA','VICUÑA'
+  ]},
+  comidas: { label:'🍕 Comidas', words:[
+    'MILANESA','EMPANADA','ASADO','CHORIPAN','ÑOQUI','PIZZA','FACTURA',
+    'ALFAJOR','MATE','CHIMICHURRI','MEDIALUNA','LOCRO','HUMITA',
+    'PROVOLETA','MORCILLA','RAVIOLES','FUGAZZETA','TARTA','PASTEL',
+    'BUDIN','HAMBURGUESA','SUSHI','TACOS','ENSALADA','SOPA','RISOTTO',
+    'TIRAMISU','FLAN','HELADO','CHURROS'
+  ]},
+  paises: { label:'🌎 Países', words:[
+    'ARGENTINA','BRASIL','CHILE','URUGUAY','PARAGUAY','BOLIVIA','PERU',
+    'COLOMBIA','MEXICO','ESPAÑA','ITALIA','FRANCIA','JAPON','AUSTRALIA',
+    'CANADA','PORTUGAL','ALEMANIA','EGIPTO','GRECIA','INDIA','TAILANDIA',
+    'TURQUIA','MARRUECOS','ISLANDIA','NORUEGA','SUIZA','HOLANDA'
+  ]},
+  peliculas: { label:'🎬 Películas', words:[
+    'TITANIC','AVATAR','FROZEN','GLADIADOR','SHREK','TOY STORY','CARS',
+    'COCO','MULAN','ENCANTO','MOANA','AMELIE','JOKER','STAR WARS',
+    'JURASSIC PARK','MATRIX','INCEPTION','NEMO','RATATOUILLE',
+    'INTERSTELLAR','PADRINO','ROCKY','FORREST GUMP','TITANES','PULP FICTION'
+  ]},
+  profesiones: { label:'👷 Profesiones', words:[
+    'DOCTOR','ARQUITECTO','PROFESOR','BOMBERO','POLICIA','ABOGADO',
+    'INGENIERO','PROGRAMADOR','ARTISTA','COCINERO','PERIODISTA',
+    'ASTRONAUTA','ACTOR','FUTBOLISTA','PILOTO','JARDINERO','CARPINTERO',
+    'DENTISTA','PLOMERO','CIENTIFICO','VETERINARIO','PSICOLOGO'
+  ]},
+  cosas: { label:'🏠 Casa', words:[
+    'HELADERA','TELEVISOR','COCINA','ALMOHADA','CORTINA','BIBLIOTECA',
+    'MICROONDAS','LAMPARA','ESPEJO','TOSTADORA','LICUADORA','SOFA',
+    'ESCALERA','BALCON','BAÑERA','INODORO','PERSIANA','ESCRITORIO',
+    'COLCHON','TOALLA','ALFOMBRA','VENTANA','PUERTA'
+  ]}
+};
+
+function defaultState(){
+  return {
+    phase:'setup',         // setup | handover | play | result
+    round:1,
+    writer:'luca',         // who writes the word this round
+    word:'',               // raw word (uppercase, with spaces)
+    normalized:'',         // accent-stripped for matching
+    hint:'',
+    guessed:[],            // letters guessed (uppercase)
+    wrongCount:0,
+    lastResult:null,       // 'win' | 'lose'
+    scores:{ luca:0, agus:0 },
+    history:[],
+    settings:{
+      teamNames:{ luca:'Luca', agus:'Agus' },
+      lives:6,
+      rotate:'alt'         // alt | loser
+    },
+    setupMode:'random',    // random | custom
+    setupCategory:'animales',
+    setupRevealed:false
+  };
+}
+let state = defaultState();
+try{
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(raw){
+    const saved = JSON.parse(raw);
+    state = mergeDeep(defaultState(), saved);
+  }
+}catch(_){}
+function mergeDeep(t, s){
+  if(typeof s !== 'object' || s === null) return s;
+  const out = Array.isArray(t) ? s : { ...t };
+  for(const k in s){
+    if(s[k] && typeof s[k] === 'object' && !Array.isArray(s[k])){
+      out[k] = mergeDeep(t[k] ?? {}, s[k]);
+    } else out[k] = s[k];
+  }
+  return out;
+}
+function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(_){} }
+
+/* Helpers */
+function normalize(s){
+  return String(s||'').toUpperCase()
+    .replace(/Á/g,'A').replace(/É/g,'E').replace(/Í/g,'I').replace(/Ó/g,'O').replace(/Ú/g,'U').replace(/Ü/g,'U');
+}
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function otherPlayer(p){ return p === 'luca' ? 'agus' : 'luca'; }
+let toastTimer;
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> el.classList.remove('show'), 1900);
+}
+
+/* =========================================================
+   Render
+   ========================================================= */
+function render(){
+  document.getElementById('round-num').textContent = state.round;
+  document.getElementById('luca-name-top').textContent = state.settings.teamNames.luca;
+  document.getElementById('agus-name-top').textContent = state.settings.teamNames.agus;
+  document.getElementById('luca-pts-top').textContent = state.scores.luca;
+  document.getElementById('agus-pts-top').textContent = state.scores.agus;
+
+  const board = document.getElementById('board');
+  switch(state.phase){
+    case 'setup':    board.innerHTML = renderSetup(); afterSetup(); break;
+    case 'handover': board.innerHTML = renderHandover(); afterHandover(); break;
+    case 'play':     board.innerHTML = renderPlay(); afterPlay(); break;
+    case 'result':   board.innerHTML = renderResult(); afterResult(); break;
+  }
+  renderHistory();
+}
+
+/* === SETUP === */
+function renderSetup(){
+  const writerName = state.settings.teamNames[state.writer];
+  const guesserName = state.settings.teamNames[otherPlayer(state.writer)];
+  const isRandom = state.setupMode === 'random';
+
+  let preview = '';
+  if(isRandom && state.word){
+    const masked = state.setupRevealed ? escapeHtml(state.word) : '<span class="blur">' + escapeHtml(state.word) + '</span>';
+    preview = `
+      <div class="word-preview">
+        ${masked}
+        <button class="toggle" id="reveal-toggle" title="${state.setupRevealed ? 'ocultar' : 'mostrar'}">${state.setupRevealed ? '🙈' : '👁'}</button>
+      </div>
+    `;
+  } else if(isRandom){
+    preview = `<div class="word-preview empty">— elegí una categoría y dale "dame una palabra" —</div>`;
+  }
+
+  const cats = Object.keys(WORD_BANK).map(k =>
+    `<option value="${k}" ${state.setupCategory === k ? 'selected':''}>${WORD_BANK[k].label}</option>`
+  ).join('');
+
+  return `
+    <h2 class="setup-title">📝 Turno de ${escapeHtml(writerName)} para esconder la palabra</h2>
+    <p style="text-align:center; color:var(--chalk-dim); margin-bottom:18px; font-size:18px;">
+      ${escapeHtml(guesserName)} <em>no debería estar mirando</em> ahora 👀
+    </p>
+
+    <div class="seg-wrap">
+      <div class="seg" id="setup-mode">
+        <button data-mode="random" class="${isRandom?'active':''}">🎲 sacar de un mazo</button>
+        <button data-mode="custom" class="${!isRandom?'active':''}">✍️ escribir la mía</button>
+      </div>
+    </div>
+
+    ${isRandom ? `
+      <div class="field">
+        <label class="field-label">Categoría</label>
+        <select id="cat-select">${cats}</select>
+      </div>
+      <div class="actions" style="justify-content:center; margin:8px 0 4px;">
+        <button class="btn primary" id="random-word-btn">🎲 dame una palabra</button>
+      </div>
+      ${preview}
+    ` : `
+      <div class="field">
+        <label class="field-label">La palabra (la otra persona no la verá)</label>
+        <input type="password" id="custom-word" placeholder="ESCRIBÍ LA PALABRA" maxlength="40" value="${escapeHtml(state.word)}">
+      </div>
+    `}
+
+    <div class="field">
+      <label class="field-label">Pista (opcional, esto sí lo verá)</label>
+      <input type="text" id="hint-input" placeholder="ej: animal grande" maxlength="50" value="${escapeHtml(state.hint)}">
+    </div>
+
+    <div class="actions">
+      <button class="btn go" id="lock-btn" ${state.word ? '' : 'disabled'}>✓ esconder y pasar la compu</button>
+    </div>
+  `;
+}
+function afterSetup(){
+  document.querySelectorAll('#setup-mode button').forEach(b => {
+    b.addEventListener('click', ()=>{
+      state.setupMode = b.dataset.mode;
+      state.word = '';
+      state.normalized = '';
+      state.setupRevealed = false;
+      save(); render();
+    });
+  });
+  const sel = document.getElementById('cat-select');
+  if(sel){
+    sel.addEventListener('change', ()=>{
+      state.setupCategory = sel.value;
+      save();
+    });
+  }
+  const rwb = document.getElementById('random-word-btn');
+  if(rwb){
+    rwb.addEventListener('click', ()=>{
+      const cat = WORD_BANK[state.setupCategory];
+      const w = cat.words[Math.floor(Math.random()*cat.words.length)];
+      state.word = w;
+      state.normalized = normalize(w);
+      state.setupRevealed = true; // auto-reveal so writer sees it
+      save(); render();
+    });
+  }
+  const tgl = document.getElementById('reveal-toggle');
+  if(tgl){
+    tgl.addEventListener('click', ()=>{
+      state.setupRevealed = !state.setupRevealed;
+      render();
+    });
+  }
+  const cw = document.getElementById('custom-word');
+  if(cw){
+    cw.addEventListener('input', ()=>{
+      state.word = cw.value.toUpperCase();
+      state.normalized = normalize(state.word);
+      // Update lock button
+      const lock = document.getElementById('lock-btn');
+      if(lock) lock.disabled = !state.normalized.replace(/[^A-ZÑ]/g,'');
+      save();
+    });
+    cw.focus();
+  }
+  const hi = document.getElementById('hint-input');
+  if(hi){
+    hi.addEventListener('input', ()=>{
+      state.hint = hi.value;
+      save();
+    });
+  }
+  document.getElementById('lock-btn').addEventListener('click', ()=>{
+    if(!state.normalized.replace(/[^A-ZÑ]/g,'')){
+      toast('falta la palabra'); return;
+    }
+    state.guessed = [];
+    state.wrongCount = 0;
+    state.phase = 'handover';
+    state.setupRevealed = false;
+    save(); render();
+  });
+}
+
+/* === HANDOVER === */
+function renderHandover(){
+  const guesser = state.settings.teamNames[otherPlayer(state.writer)];
+  return `
+    <div class="handover">
+      <div class="icon">🤝</div>
+      <h2>Pasale la compu a ${escapeHtml(guesser)}</h2>
+      <p>La palabra ya está escondida. Cuando ${escapeHtml(guesser)} esté listo/a, empezamos a adivinar.</p>
+      <div class="actions">
+        <button class="btn go" id="start-btn">▶️ Listo, empezar</button>
+      </div>
+    </div>
+  `;
+}
+function afterHandover(){
+  document.getElementById('start-btn').addEventListener('click', ()=>{
+    state.phase = 'play';
+    save(); render();
+  });
+}
+
+/* === PLAY === */
+function renderPlay(){
+  const guesser = state.settings.teamNames[otherPlayer(state.writer)];
+  const livesLeft = state.settings.lives - state.wrongCount;
+  const safe = livesLeft > Math.floor(state.settings.lives/2);
+
+  // Word display
+  let wordHtml = '';
+  for(let i = 0; i < state.normalized.length; i++){
+    const ch = state.normalized[i];
+    const orig = state.word[i] || ch;
+    if(ch === ' '){
+      wordHtml += `<div class="word-letter space"></div>`;
+    } else if(/[A-ZÑ]/.test(ch)){
+      const reveal = state.guessed.includes(ch);
+      wordHtml += `<div class="word-letter">${reveal ? escapeHtml(orig) : ''}</div>`;
+    } else {
+      // punctuation: show it
+      wordHtml += `<div class="word-letter">${escapeHtml(orig)}</div>`;
+    }
+  }
+
+  // Keyboard
+  const rows = ['QWERTYUIOP','ASDFGHJKLÑ','ZXCVBNM'];
+  const kbd = rows.map(row => {
+    const keys = row.split('').map(L => {
+      let cls = 'kbd-key';
+      let dis = '';
+      if(state.guessed.includes(L)){
+        const inWord = state.normalized.includes(L);
+        cls += inWord ? ' right' : ' wrong';
+        dis = 'disabled';
+      }
+      return `<button class="${cls}" data-l="${L}" ${dis}>${L}</button>`;
+    }).join('');
+    return `<div class="kbd-row">${keys}</div>`;
+  }).join('');
+
+  return `
+    <div class="play-grid">
+      <div class="hangman-wrap">
+        ${buildHangmanSVG(state.wrongCount, state.settings.lives)}
+        <div class="lives ${safe?'safe':''}">vidas: <span class="num">${livesLeft}</span> / ${state.settings.lives}</div>
+        <div style="font-family:'Caveat'; font-size:18px; color:var(--chalk-dim); text-align:center;">
+          adivina <strong style="color:var(--chalk-yellow)">${escapeHtml(guesser)}</strong>
+        </div>
+      </div>
+
+      <div class="play-right">
+        ${state.hint
+          ? `<div class="hint-box">💡 ${escapeHtml(state.hint)}</div>`
+          : `<div class="hint-box empty">— sin pista —</div>`}
+        <div class="word-display" id="word-display">${wordHtml}</div>
+        <div class="keyboard">${kbd}</div>
+        <div class="actions">
+          <button class="btn ghost tiny" id="give-up-btn">me rindo</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function afterPlay(){
+  document.querySelectorAll('.kbd-key').forEach(k => {
+    k.addEventListener('click', ()=> guessLetter(k.dataset.l));
+  });
+  document.getElementById('give-up-btn').addEventListener('click', ()=>{
+    if(!confirm('¿Te rendís? Suma punto el que escribió.')) return;
+    finishRound('lose');
+  });
+}
+
+function buildHangmanSVG(wrong, maxWrong){
+  // 6 traditional parts; if maxWrong >8 we add face features (eyes, mouth)
+  const partsToShow = Math.min(wrong, 10);
+  const parts = [
+    // 1: head
+    `<circle cx="135" cy="65" r="16" class="part p1 ${partsToShow>=1?'show':''} ${wrong===1?'dying':''}"/>`,
+    // 2: body
+    `<line x1="135" y1="81" x2="135" y2="145" class="part p2 ${partsToShow>=2?'show':''} ${wrong===2?'dying':''}"/>`,
+    // 3: left arm
+    `<line x1="135" y1="100" x2="108" y2="120" class="part p3 ${partsToShow>=3?'show':''} ${wrong===3?'dying':''}"/>`,
+    // 4: right arm
+    `<line x1="135" y1="100" x2="162" y2="120" class="part p4 ${partsToShow>=4?'show':''} ${wrong===4?'dying':''}"/>`,
+    // 5: left leg
+    `<line x1="135" y1="145" x2="110" y2="180" class="part p5 ${partsToShow>=5?'show':''} ${wrong===5?'dying':''}"/>`,
+    // 6: right leg
+    `<line x1="135" y1="145" x2="160" y2="180" class="part p6 ${partsToShow>=6?'show':''} ${wrong===6?'dying':''}"/>`,
+    // 7: left eye (X)
+    `<line x1="129" y1="60" x2="133" y2="64" class="part p7 ${partsToShow>=7?'show':''}" stroke-width="2.5"/>
+     <line x1="133" y1="60" x2="129" y2="64" class="part p7 ${partsToShow>=7?'show':''}" stroke-width="2.5"/>`,
+    // 8: right eye (X)
+    `<line x1="137" y1="60" x2="141" y2="64" class="part p8 ${partsToShow>=8?'show':''}" stroke-width="2.5"/>
+     <line x1="141" y1="60" x2="137" y2="64" class="part p8 ${partsToShow>=8?'show':''}" stroke-width="2.5"/>`,
+    // 9: mouth (sad)
+    `<path d="M127 73 Q135 68 143 73" class="part p9 ${partsToShow>=9?'show':''}" stroke-width="2.5"/>`,
+    // 10: tear
+    `<line x1="129" y1="68" x2="129" y2="74" class="part p10 ${partsToShow>=10?'show':''}" stroke="#9bd0e8"/>`
+  ];
+  // We'll show the first N where N = wrong
+  return `
+    <svg class="hangman" viewBox="0 0 200 240">
+      <!-- gallows always visible -->
+      <line class="gallows" x1="20" y1="225" x2="180" y2="225"/>
+      <line class="gallows" x1="50" y1="225" x2="50" y2="20"/>
+      <line class="gallows" x1="50" y1="20" x2="135" y2="20"/>
+      <line class="gallows" x1="135" y1="20" x2="135" y2="48"/>
+      <!-- knot -->
+      <circle class="gallows" cx="135" cy="50" r="2.5" fill="#d4cdb6"/>
+      ${parts.join('\n')}
+    </svg>
+  `;
+}
+
+function guessLetter(L){
+  if(state.phase !== 'play') return;
+  L = L.toUpperCase();
+  if(state.guessed.includes(L)) return;
+  state.guessed.push(L);
+  if(state.normalized.includes(L)){
+    // right
+    // Check if won
+    const won = [...state.normalized].every(ch => !/[A-ZÑ]/.test(ch) || state.guessed.includes(ch));
+    save();
+    render();
+    if(won) setTimeout(()=> finishRound('win'), 350);
+  } else {
+    state.wrongCount++;
+    save();
+    render();
+    if(state.wrongCount >= state.settings.lives){
+      setTimeout(()=> finishRound('lose'), 600);
+    }
+  }
+}
+
+function finishRound(result){
+  state.lastResult = result;
+  state.phase = 'result';
+  // Update scores: 'win' means guesser wins, 'lose' means writer wins
+  const guesser = otherPlayer(state.writer);
+  if(result === 'win'){
+    state.scores[guesser]++;
+  } else {
+    state.scores[state.writer]++;
+  }
+  // Save to history
+  state.history.push({
+    round: state.round,
+    word: state.word,
+    hint: state.hint,
+    writer: state.writer,
+    guesser,
+    result,
+    wrongCount: state.wrongCount,
+    date: new Date().toISOString()
+  });
+  if(result === 'win') confetti();
+  save(); render();
+}
+
+/* === RESULT === */
+function renderResult(){
+  const won = state.lastResult === 'win';
+  const guesser = state.settings.teamNames[otherPlayer(state.writer)];
+  const writer = state.settings.teamNames[state.writer];
+  const winner = won ? guesser : writer;
+  return `
+    <div class="result">
+      <div class="big-icon">${won ? '🎉' : '💀'}</div>
+      <h2 class="${won?'win':'lose'}">${won ? `¡La sacó ${escapeHtml(guesser)}!` : `Te ahorcaron ${escapeHtml(guesser)}`}</h2>
+      <div class="word-was">la palabra era…</div>
+      <div class="word-final">${escapeHtml(state.word)}</div>
+      <p style="color:var(--chalk-dim); font-size:18px; margin-bottom:14px;">
+        +1 punto para <strong style="color:var(--chalk-yellow)">${escapeHtml(winner)}</strong>
+      </p>
+      <div class="actions">
+        <button class="btn go" id="next-btn">▶️ próxima ronda</button>
+      </div>
+    </div>
+  `;
+}
+function afterResult(){
+  document.getElementById('next-btn').addEventListener('click', nextRound);
+}
+
+function nextRound(){
+  // Decide next writer
+  if(state.settings.rotate === 'alt'){
+    state.writer = otherPlayer(state.writer);
+  } else { // 'loser': loser of this round writes next
+    const guesser = otherPlayer(state.writer);
+    state.writer = state.lastResult === 'win' ? guesser : state.writer; // winner writes next
+    // Actually for "loser writes": loser writes for winner
+    state.writer = state.lastResult === 'win' ? state.writer : guesser;
+  }
+  state.round++;
+  state.phase = 'setup';
+  state.word = '';
+  state.normalized = '';
+  state.hint = '';
+  state.guessed = [];
+  state.wrongCount = 0;
+  state.lastResult = null;
+  state.setupRevealed = false;
+  save(); render();
+}
+
+/* === HISTORY === */
+function renderHistory(){
+  const list = document.getElementById('history-list');
+  if(!state.history.length){
+    list.innerHTML = `<div class="h-empty">— sin rondas todavía. ¡a esconder palabras! —</div>`;
+    return;
+  }
+  list.innerHTML = state.history.slice().reverse().map(h => {
+    const won = h.result === 'win';
+    const guesserName = state.settings.teamNames[h.guesser];
+    const writerName = state.settings.teamNames[h.writer];
+    return `
+      <div class="h-row">
+        <div class="num">#${h.round}</div>
+        <div class="word">${escapeHtml(h.word)}</div>
+        <div class="res ${won?'win':'lose'}">${won?'🎯 ganó':'💀 perdió'}</div>
+        <div class="who">${escapeHtml(guesserName)}<br><small style="opacity:.6;">vs ${escapeHtml(writerName)}</small></div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* === Confetti === */
+function confetti(){
+  const colors = ['#fdd870','#a5d97f','#ff8c8c','#9bd0e8','#ffb3d1','#f5f0e8'];
+  for(let i = 0; i < 70; i++){
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random()*100 + 'vw';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDuration = (2 + Math.random()*2) + 's';
+    p.style.animationDelay = (Math.random()*0.5) + 's';
+    document.body.appendChild(p);
+    setTimeout(()=> p.remove(), 4500);
+  }
+}
+
+/* === Settings modal === */
+function openSettings(){
+  document.getElementById('name-luca').value = state.settings.teamNames.luca;
+  document.getElementById('name-agus').value = state.settings.teamNames.agus;
+  document.querySelectorAll('#lives-seg button').forEach(b => b.classList.toggle('active', parseInt(b.dataset.n) === state.settings.lives));
+  document.querySelectorAll('#rotate-seg button').forEach(b => b.classList.toggle('active', b.dataset.r === state.settings.rotate));
+  document.getElementById('settings-modal').classList.add('show');
+}
+function closeSettings(){
+  document.getElementById('settings-modal').classList.remove('show');
+  render();
+}
+document.getElementById('settings-btn').addEventListener('click', openSettings);
+document.getElementById('settings-close').addEventListener('click', closeSettings);
+document.getElementById('settings-modal').addEventListener('click', (e)=>{
+  if(e.target.id === 'settings-modal') closeSettings();
+});
+document.getElementById('name-luca').addEventListener('input', e => { state.settings.teamNames.luca = e.target.value.trim() || 'Luca'; save(); });
+document.getElementById('name-agus').addEventListener('input', e => { state.settings.teamNames.agus = e.target.value.trim() || 'Agus'; save(); });
+document.querySelectorAll('#lives-seg button').forEach(b => {
+  b.addEventListener('click', ()=>{
+    state.settings.lives = parseInt(b.dataset.n);
+    document.querySelectorAll('#lives-seg button').forEach(x => x.classList.toggle('active', x === b));
+    save();
+  });
+});
+document.querySelectorAll('#rotate-seg button').forEach(b => {
+  b.addEventListener('click', ()=>{
+    state.settings.rotate = b.dataset.r;
+    document.querySelectorAll('#rotate-seg button').forEach(x => x.classList.toggle('active', x === b));
+    save();
+  });
+});
+document.getElementById('clear-history').addEventListener('click', ()=>{
+  if(!confirm('¿Borrar todo el historial?')) return;
+  state.history = []; save(); renderHistory(); toast('historial borrado');
+});
+document.getElementById('reset-all').addEventListener('click', ()=>{
+  if(!confirm('¿Reiniciar todo? Se pierden ajustes, puntos e historial.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state = defaultState();
+  save(); closeSettings(); render();
+  toast('reiniciado');
+});
+
+/* Physical keyboard */
+document.addEventListener('keydown', (e)=>{
+  if(state.phase !== 'play') return;
+  if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  let key = e.key.toUpperCase();
+  if(key === 'Ñ' || /^[A-Z]$/.test(key)){
+    guessLetter(key);
+  }
+});
+
+render();
+</script>
+
+</body>
+</html>

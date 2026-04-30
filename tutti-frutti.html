@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎯 Tutti Frutti — Agus &amp; Luca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fjalla+One&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#0a2238;
+    --bg:#143657;
+    --bg-soft:#1f4d77;
+    --bg-line:#2c6892;
+    --paper:#f6ecd0;
+    --paper-warm:#efdfa3;
+    --paper-edge:#d8c489;
+    --ink:#14181f;
+    --ink-soft:#374252;
+    --ink-dim:#6b7585;
+    --red:#e63946;
+    --red-dark:#a02633;
+    --gold:#f4b942;
+    --gold-dark:#c79324;
+    --mint:#52b788;
+    --mint-dark:#2d8a5e;
+    --plum:#9d4edd;
+    --aqua:#48cae4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{ min-height:100%; }
+
+  body{
+    font-family:'Inter', system-ui, sans-serif;
+    color:var(--paper);
+    padding:18px 14px 50px;
+    background:
+      radial-gradient(ellipse 800px 600px at 20% 10%, rgba(244,185,66,.06) 0%, transparent 60%),
+      radial-gradient(ellipse 700px 500px at 80% 90%, rgba(157,78,221,.08) 0%, transparent 60%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+    background-attachment: fixed;
+    overflow-x:hidden;
+  }
+  /* Dotted texture overlay */
+  body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image: radial-gradient(rgba(246,236,208,.04) 1px, transparent 1px);
+    background-size: 18px 18px;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .app{ position:relative; z-index:1; max-width:920px; margin:0 auto; }
+
+  /* ---------- Header ---------- */
+  .header{ text-align:center; margin-bottom:20px; }
+  .header h1{
+    font-family:'Bungee', cursive;
+    font-size:clamp(36px, 6.4vw, 60px);
+    color:var(--paper);
+    letter-spacing:3px;
+    line-height:1;
+    text-shadow:
+      3px 3px 0 var(--red),
+      6px 6px 0 var(--bg-deep),
+      8px 10px 16px rgba(0,0,0,.55);
+  }
+  .header .sub{
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    color:var(--gold);
+    letter-spacing:4px;
+    text-transform:uppercase;
+    margin-top:6px;
+  }
+
+  /* ---------- Scoreboard ---------- */
+  .scoreboard{
+    display:grid;
+    grid-template-columns: 1fr auto 1fr auto;
+    align-items:center;
+    gap:14px;
+    background:var(--bg-deep);
+    border:2px solid var(--bg-line);
+    border-radius:14px;
+    padding:14px 18px;
+    margin-bottom:22px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .sc-side{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+  }
+  .sc-side .name{
+    font-family:'Fjalla One', sans-serif;
+    font-size:18px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--paper);
+  }
+  .sc-side.luca .name{ color:var(--red); }
+  .sc-side.agus .name{ color:var(--aqua); }
+  .sc-side .score{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:42px;
+    color:var(--paper);
+    line-height:1;
+  }
+  .sc-side .meta{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--ink-dim);
+    letter-spacing:1px;
+  }
+  .vs-divider{
+    font-family:'Bungee', cursive;
+    font-size:22px;
+    color:var(--gold);
+    text-shadow: 2px 2px 0 var(--bg-deep);
+    letter-spacing:2px;
+  }
+  .icon-btn{
+    background:var(--bg-soft);
+    border:2px solid var(--bg-line);
+    color:var(--paper);
+    border-radius:10px;
+    width:42px; height:42px;
+    font-size:18px;
+    cursor:pointer;
+    transition:transform .15s, background .15s;
+  }
+  .icon-btn:hover{ background:var(--bg-line); transform:rotate(20deg); }
+
+  /* ---------- Main card ---------- */
+  .card{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:18px;
+    padding:28px 26px 32px;
+    box-shadow:
+      0 16px 40px rgba(0,0,0,.45),
+      0 0 0 1px rgba(255,255,255,.04),
+      inset 0 -3px 0 var(--paper-edge);
+    margin-bottom:22px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:'';
+    position:absolute;
+    top:0; left:0; right:0;
+    height:8px;
+    background:linear-gradient(90deg,
+      var(--red) 0%, var(--red) 16%,
+      var(--gold) 16%, var(--gold) 32%,
+      var(--mint) 32%, var(--mint) 48%,
+      var(--aqua) 48%, var(--aqua) 64%,
+      var(--plum) 64%, var(--plum) 80%,
+      var(--red) 80%, var(--red) 100%);
+  }
+
+  /* ---------- Wheel ---------- */
+  .wheel-area{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+  }
+  .wheel-wrap{
+    position:relative;
+    width:min(380px, 86vw);
+    aspect-ratio:1;
+    filter: drop-shadow(0 14px 26px rgba(0,0,0,.35));
+  }
+  #wheel-svg{ width:100%; height:100%; display:block; }
+  #wheel{
+    transform-origin:center;
+    transform-box: fill-box;
+    transition: transform 4.6s cubic-bezier(0.17, 0.67, 0.10, 0.99);
+  }
+  .wheel-pointer{
+    position:absolute;
+    top:-8px; left:50%;
+    transform:translateX(-50%);
+    width:0; height:0;
+    border-left:18px solid transparent;
+    border-right:18px solid transparent;
+    border-top:34px solid var(--red-dark);
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,.3));
+    z-index:2;
+  }
+  .wheel-pointer::after{
+    content:'';
+    position:absolute;
+    top:-34px; left:-12px;
+    width:24px; height:18px;
+    background:var(--red);
+    border-radius:6px 6px 0 0;
+  }
+
+  .lead{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:15px;
+    line-height:1.4;
+    max-width:480px;
+  }
+  .lead strong{ color:var(--ink); }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font-family:'Fjalla One', sans-serif;
+    font-size:18px;
+    padding:14px 30px;
+    border-radius:99px;
+    border:none;
+    cursor:pointer;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    transition: transform .1s, box-shadow .15s;
+    color:white;
+    background: var(--ink);
+    box-shadow:0 6px 0 rgba(0,0,0,.35);
+  }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 8px 0 rgba(0,0,0,.35); }
+  .btn:active{ transform:translateY(2px); box-shadow:0 3px 0 rgba(0,0,0,.35); }
+  .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
+  .btn.primary{ background:var(--red); box-shadow:0 6px 0 var(--red-dark); }
+  .btn.primary:hover{ box-shadow:0 8px 0 var(--red-dark); }
+  .btn.primary:active{ box-shadow:0 3px 0 var(--red-dark); }
+  .btn.go{ background:var(--mint); box-shadow:0 6px 0 var(--mint-dark); }
+  .btn.go:hover{ box-shadow:0 8px 0 var(--mint-dark); }
+  .btn.go:active{ box-shadow:0 3px 0 var(--mint-dark); }
+  .btn.gold{ background:var(--gold); color:var(--ink); box-shadow:0 6px 0 var(--gold-dark); }
+  .btn.gold:hover{ box-shadow:0 8px 0 var(--gold-dark); }
+  .btn.gold:active{ box-shadow:0 3px 0 var(--gold-dark); }
+  .btn.ghost{
+    background:transparent;
+    color:var(--ink-soft);
+    box-shadow:none;
+    border:2px solid var(--paper-edge);
+  }
+  .btn.ghost:hover{ background:var(--paper-warm); transform:none; box-shadow:none; }
+  .btn.tiny{ font-size:12px; padding:8px 14px; box-shadow:none; }
+
+  .actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:8px;
+  }
+
+  /* ---------- Logged phase ---------- */
+  .logged{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+    padding:8px 0;
+  }
+  .big-letter{
+    width:160px; height:160px;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,.55) 0%, transparent 40%),
+      conic-gradient(from 0deg,
+        var(--red), var(--gold), var(--mint), var(--aqua), var(--plum), var(--red));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Bungee', cursive;
+    font-size:96px;
+    color:white;
+    text-shadow:
+      3px 3px 0 rgba(0,0,0,.25),
+      0 0 14px rgba(255,255,255,.5);
+    box-shadow:
+      0 14px 30px rgba(0,0,0,.25),
+      inset 0 -8px 16px rgba(0,0,0,.15),
+      inset 0 6px 14px rgba(255,255,255,.25);
+    animation: pop .55s cubic-bezier(.2,1.4,.4,1);
+  }
+  @keyframes pop{
+    0%{ transform: scale(.2) rotate(-15deg); opacity:0; }
+    60%{ transform: scale(1.12) rotate(8deg); opacity:1; }
+    100%{ transform: scale(1) rotate(0); opacity:1; }
+  }
+  .logged-title{
+    font-family:'Fjalla One', sans-serif;
+    font-size:clamp(20px, 3.5vw, 28px);
+    color:var(--ink);
+    letter-spacing:2px;
+    text-transform:uppercase;
+    text-align:center;
+  }
+  .logged-title .letter-inline{
+    background:var(--gold);
+    color:var(--ink);
+    padding:0 10px;
+    border-radius:6px;
+    margin:0 4px;
+    font-family:'Bungee', cursive;
+  }
+
+  /* ---------- Score form ---------- */
+  .score-form{
+    display:grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap:14px;
+    align-items:end;
+    background:var(--paper-warm);
+    border:2px solid var(--paper-edge);
+    border-radius:14px;
+    padding:18px;
+    width:100%;
+    max-width:520px;
+  }
+  .score-form .col{ display:flex; flex-direction:column; gap:6px; }
+  .score-form label{
+    font-family:'Fjalla One', sans-serif;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:2px;
+    color:var(--ink-soft);
+    text-align:center;
+  }
+  .score-form .col.luca label{ color:var(--red-dark); }
+  .score-form .col.agus label{ color:#1a6688; }
+  .score-form input[type="number"]{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:36px;
+    text-align:center;
+    border:3px solid var(--paper-edge);
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:10px;
+    padding:8px 4px;
+    width:100%;
+    -moz-appearance: textfield;
+  }
+  .score-form input[type="number"]:focus{
+    outline:none;
+    border-color:var(--red);
+    box-shadow: 0 0 0 4px rgba(230,57,70,.15);
+  }
+  .score-form input[type="number"]::-webkit-outer-spin-button,
+  .score-form input[type="number"]::-webkit-inner-spin-button{
+    -webkit-appearance: none; margin:0;
+  }
+  .score-form .col.luca input{ border-color: var(--red); }
+  .score-form .col.agus input{ border-color: var(--aqua); color:var(--ink); }
+  .score-form .vs{
+    font-family:'Bungee', cursive;
+    font-size:24px;
+    color:var(--ink-soft);
+    padding-bottom:14px;
+  }
+  .winner-hint{
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    color:var(--ink-dim);
+    text-align:center;
+    height:18px;
+    letter-spacing:1px;
+  }
+  .winner-hint .who{ font-weight:700; }
+  .winner-hint .who.luca{ color:var(--red-dark); }
+  .winner-hint .who.agus{ color:#1a6688; }
+  .winner-hint .who.tie{ color:var(--ink-soft); }
+
+  /* ---------- History ---------- */
+  .history{
+    background:var(--bg-deep);
+    border:2px solid var(--bg-line);
+    border-radius:14px;
+    padding:18px 18px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  }
+  .history h2{
+    font-family:'Fjalla One', sans-serif;
+    color:var(--gold);
+    font-size:18px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    margin-bottom:14px;
+    text-align:center;
+  }
+  .h-stats{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .stat-card{
+    background:var(--bg-soft);
+    border:1px solid var(--bg-line);
+    border-radius:10px;
+    padding:10px 8px;
+    text-align:center;
+  }
+  .stat-card .label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    color:var(--ink-dim);
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+  }
+  .stat-card .val{
+    font-family:'Bungee', cursive;
+    font-size:30px;
+    line-height:1.1;
+    margin-top:4px;
+  }
+  .stat-card.luca .val{ color:var(--red); }
+  .stat-card.middle .val{ color:var(--gold); }
+  .stat-card.agus .val{ color:var(--aqua); }
+
+  .history-list{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    max-height:340px;
+    overflow-y:auto;
+    padding-right:4px;
+  }
+  .history-list::-webkit-scrollbar{ width:6px; }
+  .history-list::-webkit-scrollbar-track{ background:rgba(255,255,255,.05); border-radius:3px; }
+  .history-list::-webkit-scrollbar-thumb{ background:var(--bg-line); border-radius:3px; }
+
+  .h-row{
+    display:grid;
+    grid-template-columns: 50px 50px 1fr 1fr 80px 26px;
+    gap:8px;
+    align-items:center;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:10px;
+    padding:8px 12px;
+    transition: background .12s;
+  }
+  .h-row:hover{ background:rgba(255,255,255,.07); }
+  .h-row .num{
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    color:var(--ink-dim);
+  }
+  .h-row .h-letter{
+    width:36px; height:36px;
+    border-radius:50%;
+    background:conic-gradient(from 0deg, var(--red), var(--gold), var(--mint), var(--aqua), var(--plum), var(--red));
+    color:white;
+    font-family:'Bungee', cursive;
+    font-size:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-shadow:1px 1px 0 rgba(0,0,0,.3);
+  }
+  .h-row .h-luca, .h-row .h-agus{
+    font-family:'JetBrains Mono', monospace;
+    font-size:14px;
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+  }
+  .h-row .h-luca .nm{ color:var(--red); font-weight:700; }
+  .h-row .h-agus .nm{ color:var(--aqua); font-weight:700; }
+  .h-row .pts{ color:var(--paper); font-weight:700; font-size:16px; }
+  .h-row .pts.win{ color:var(--mint); }
+  .h-row .h-result{
+    font-family:'Fjalla One', sans-serif;
+    font-size:11px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    text-align:center;
+    color:var(--paper);
+  }
+  .h-row .h-result.luca{ color:var(--red); }
+  .h-row .h-result.agus{ color:var(--aqua); }
+  .h-row .h-result.tie{ color:var(--gold); }
+  .h-row .del{
+    background:transparent;
+    border:none;
+    color:var(--ink-dim);
+    cursor:pointer;
+    font-size:14px;
+    padding:4px;
+  }
+  .h-row .del:hover{ color:var(--red); }
+  .h-empty{
+    text-align:center;
+    color:var(--ink-dim);
+    padding:18px;
+    font-style:italic;
+  }
+
+  /* ---------- Modal (settings) ---------- */
+  .modal{
+    position:fixed; inset:0;
+    background:rgba(10,34,56,.85);
+    display:none;
+    align-items:flex-start;
+    justify-content:center;
+    padding:30px 16px;
+    overflow-y:auto;
+    z-index:100;
+    backdrop-filter:blur(3px);
+  }
+  .modal.show{ display:flex; }
+  .modal-content{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:14px;
+    width:100%; max-width:520px;
+    padding:24px 26px 28px;
+    position:relative;
+    box-shadow: 0 14px 40px rgba(0,0,0,.5);
+  }
+  .modal-content h2{
+    font-family:'Fjalla One', sans-serif;
+    color:var(--ink);
+    margin-bottom:14px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+  }
+  .modal .close-btn{
+    position:absolute; top:12px; right:12px;
+    width:32px; height:32px;
+    border:2px solid var(--ink);
+    background:transparent;
+    color:var(--ink);
+    border-radius:50%;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .field{ margin-bottom:16px; }
+  .field-label{
+    display:block;
+    font-family:'Fjalla One', sans-serif;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:2px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  .field input[type="text"]{
+    width:100%;
+    padding:10px 14px;
+    border:2px solid var(--paper-edge);
+    background:var(--paper-warm);
+    border-radius:8px;
+    font-family:'Inter', sans-serif;
+    font-size:15px;
+    color:var(--ink);
+  }
+  .field input:focus{ outline:none; border-color:var(--red); }
+  .letters-grid{
+    display:grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap:4px;
+  }
+  .letter-toggle{
+    aspect-ratio:1;
+    border:2px solid var(--paper-edge);
+    background:var(--paper-warm);
+    border-radius:8px;
+    font-family:'Bungee', cursive;
+    font-size:16px;
+    cursor:pointer;
+    color:var(--ink-dim);
+    transition: all .12s;
+  }
+  .letter-toggle.on{
+    background:var(--mint);
+    color:white;
+    border-color:var(--mint-dark);
+    box-shadow:0 3px 0 var(--mint-dark);
+  }
+  .danger-zone{
+    margin-top:16px;
+    padding:12px;
+    border:2px dashed var(--red);
+    border-radius:10px;
+    background:rgba(230,57,70,.06);
+  }
+  .danger-zone h3{ color:var(--red); font-size:13px; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;}
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed;
+    top:24px; left:50%;
+    transform:translateX(-50%) translateY(-120px);
+    background:var(--paper);
+    color:var(--ink);
+    padding:10px 22px;
+    border-radius:99px;
+    font-weight:700;
+    z-index:300;
+    transition:transform .3s cubic-bezier(.2,.9,.4,1.1);
+    box-shadow:0 10px 26px rgba(0,0,0,.45);
+  }
+  .toast.show{ transform:translateX(-50%) translateY(0); }
+
+  /* ---------- Confetti ---------- */
+  .confetti-piece{
+    position:fixed;
+    width:10px; height:14px;
+    top:-20px;
+    z-index:250;
+    animation: fall 2.6s ease-in forwards;
+    pointer-events:none;
+  }
+  @keyframes fall{
+    0%{ transform: translateY(0) rotate(0); opacity:1; }
+    100%{ transform: translateY(110vh) rotate(720deg); opacity:.3; }
+  }
+
+  /* Responsive tweaks */
+  @media (max-width:560px){
+    .scoreboard{ grid-template-columns:1fr auto 1fr; padding:12px; gap:10px; }
+    .scoreboard .icon-btn{ grid-column: 1 / -1; justify-self:end; }
+    .sc-side .score{ font-size:34px; }
+    .big-letter{ width:130px; height:130px; font-size:78px; }
+    .score-form{ grid-template-columns: 1fr; }
+    .score-form .vs{ display:none; }
+    .h-row{ grid-template-columns: 36px 36px 1fr 1fr 60px 22px; font-size:12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="header">
+    <h1>🎯 TUTTI FRUTTI</h1>
+    <p class="sub">— Ruleta &amp; Marcador —</p>
+  </header>
+
+  <div class="scoreboard">
+    <div class="sc-side luca">
+      <span class="name" id="luca-name">Luca</span>
+      <span class="score" id="luca-score">0</span>
+      <span class="meta" id="luca-meta">0 ganadas</span>
+    </div>
+    <span class="vs-divider">VS</span>
+    <div class="sc-side agus">
+      <span class="name" id="agus-name">Agus</span>
+      <span class="score" id="agus-score">0</span>
+      <span class="meta" id="agus-meta">0 ganadas</span>
+    </div>
+    <button class="icon-btn" id="settings-btn" title="Ajustes">⚙️</button>
+  </div>
+
+  <main class="card" id="main-card">
+    <!-- content swapped per phase: ready | spinning | logged -->
+  </main>
+
+  <section class="history">
+    <h2>📋 Historial de rondas</h2>
+    <div class="h-stats" id="h-stats"></div>
+    <div class="history-list" id="history-list"></div>
+  </section>
+
+</div>
+
+<!-- ===== Settings modal ===== -->
+<div class="modal" id="settings-modal">
+  <div class="modal-content">
+    <button class="close-btn" id="settings-close">✕</button>
+    <h2>⚙️ Ajustes</h2>
+
+    <div class="field">
+      <label class="field-label">Nombres</label>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="name-luca" placeholder="Luca">
+        <input type="text" id="name-agus" placeholder="Agus">
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Letras permitidas</label>
+      <div class="letters-grid" id="letters-grid"></div>
+      <p style="font-size:12px; color:var(--ink-dim); margin-top:6px;">la ruleta solo va a parar en las verdes</p>
+    </div>
+
+    <div class="danger-zone">
+      <h3>Zona de peligro</h3>
+      <div class="actions" style="justify-content:flex-start; gap:8px;">
+        <button class="btn ghost tiny" id="clear-history">borrar historial</button>
+        <button class="btn ghost tiny" id="reset-all" style="border-color:var(--red); color:var(--red);">reiniciar todo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   Tutti Frutti — Ruleta + Marcador (Agus & Luca)
+   ========================================================= */
+const STORAGE_KEY = 'tutti-frutti-roulette-v2';
+
+const ALL_LETTERS = ['A','B','C','D','E','F','G','H','I','J','L','M','N','O','P','Q','R','S','T','U','V','Z'];
+const DEFAULT_LETTERS = ['A','B','C','D','E','F','G','H','I','J','L','M','N','O','P','R','S','T','V','Z'];
+
+function defaultState(){
+  return {
+    phase: 'ready',          // ready | spinning | logged
+    letter: null,
+    spinDeg: 0,
+    scores: { luca: 0, agus: 0 },
+    pending: { luca: 0, agus: 0 },  // current round's points (form state)
+    history: [],
+    settings: {
+      teamNames: { luca: 'Luca', agus: 'Agus' },
+      letters: DEFAULT_LETTERS.slice()
+    }
+  };
+}
+
+let state = defaultState();
+try{
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(raw){
+    const saved = JSON.parse(raw);
+    state = mergeDeep(defaultState(), saved);
+  }
+}catch(_){}
+
+function mergeDeep(t, s){
+  if(typeof s !== 'object' || s === null) return s;
+  const out = Array.isArray(t) ? s : { ...t };
+  for(const k in s){
+    if(s[k] && typeof s[k] === 'object' && !Array.isArray(s[k])){
+      out[k] = mergeDeep(t[k] ?? {}, s[k]);
+    } else out[k] = s[k];
+  }
+  return out;
+}
+function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(_){} }
+
+/* Helpers */
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+let toastTimer;
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> el.classList.remove('show'), 2000);
+}
+function winnerOf(luca, agus){
+  if(luca > agus) return 'luca';
+  if(agus > luca) return 'agus';
+  return 'tie';
+}
+
+/* ---------- Wheel ---------- */
+function buildWheelSVG(){
+  const r = 130;
+  const n = ALL_LETTERS.length;
+  const slice = 360 / n;
+  const palette = ['#e63946', '#f4b942', '#52b788', '#48cae4', '#9d4edd', '#f47862', '#56cfe1'];
+  let body = '';
+  for(let i = 0; i < n; i++){
+    const startAng = (i * slice - slice/2) - 90;
+    const endAng = startAng + slice;
+    const sr = startAng * Math.PI/180;
+    const er = endAng * Math.PI/180;
+    const x1 = r * Math.cos(sr), y1 = r * Math.sin(sr);
+    const x2 = r * Math.cos(er), y2 = r * Math.sin(er);
+    const path = `M0,0 L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 0 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z`;
+    const color = palette[i % palette.length];
+    const enabled = state.settings.letters.includes(ALL_LETTERS[i]);
+    const opacity = enabled ? 1 : 0.16;
+    body += `<path d="${path}" fill="${color}" stroke="white" stroke-width="2" opacity="${opacity}"/>`;
+    const midAng = startAng + slice/2;
+    const mr = midAng * Math.PI/180;
+    const lx = (r * 0.72) * Math.cos(mr);
+    const ly = (r * 0.72) * Math.sin(mr);
+    const textRot = midAng + 90;
+    body += `<text x="${lx.toFixed(2)}" y="${ly.toFixed(2)}" text-anchor="middle" dominant-baseline="middle" font-family="Bungee" font-size="22" fill="white" stroke="rgba(0,0,0,.35)" stroke-width="0.6" transform="rotate(${textRot.toFixed(2)} ${lx.toFixed(2)} ${ly.toFixed(2)})" opacity="${opacity}">${ALL_LETTERS[i]}</text>`;
+  }
+  return `
+    <svg viewBox="-160 -160 320 320" id="wheel-svg" aria-hidden="true">
+      <g id="wheel" style="transform: rotate(${state.spinDeg}deg);">
+        ${body}
+        <circle r="${r}" fill="none" stroke="white" stroke-width="6"/>
+      </g>
+      <circle r="22" fill="white" stroke="#0a2238" stroke-width="3"/>
+      <circle r="8" fill="#0a2238"/>
+    </svg>
+  `;
+}
+
+/* ---------- Spin (animates the wheel WITHOUT re-rendering the DOM) ---------- */
+function startSpin(){
+  if(state.phase !== 'ready') return;
+  if(!state.settings.letters.length){
+    toast('activá al menos una letra en ajustes');
+    return;
+  }
+  state.phase = 'spinning';
+
+  // Disable button visually without re-rendering
+  const btn = document.getElementById('spin-btn');
+  if(btn){ btn.disabled = true; btn.textContent = '🌀 girando…'; }
+
+  const eligibleIdx = state.settings.letters
+    .map(l => ALL_LETTERS.indexOf(l))
+    .filter(i => i >= 0);
+  const targetIdx = eligibleIdx[Math.floor(Math.random() * eligibleIdx.length)];
+
+  const slice = 360 / ALL_LETTERS.length;
+  const fullSpins = 5 + Math.floor(Math.random() * 4);
+  const targetMod = (360 - targetIdx * slice) % 360;
+  const currentMod = ((state.spinDeg % 360) + 360) % 360;
+  let extra = targetMod - currentMod;
+  if(extra <= 0) extra += 360;
+  const wobble = (Math.random() - 0.5) * slice * 0.55;
+  const newRotation = state.spinDeg + fullSpins * 360 + extra + wobble;
+
+  state.spinDeg = newRotation;
+
+  // Update transform on the EXISTING wheel element — CSS transition kicks in
+  const wheelEl = document.getElementById('wheel');
+  if(wheelEl){
+    wheelEl.style.transform = `rotate(${newRotation}deg)`;
+  }
+
+  setTimeout(()=>{
+    state.letter = ALL_LETTERS[targetIdx];
+    state.phase = 'logged';
+    state.pending = { luca: 0, agus: 0 };
+    save();
+    render();
+  }, 4700);
+}
+
+/* ---------- Save round ---------- */
+function saveRound(){
+  const { luca, agus } = state.pending;
+  if(luca === 0 && agus === 0){
+    if(!confirm('Ambos jugadores con 0 puntos. ¿Guardar igual?')) return;
+  }
+  const result = winnerOf(luca, agus);
+  state.scores.luca += luca;
+  state.scores.agus += agus;
+  state.history.push({
+    round: state.history.length + 1,
+    letter: state.letter,
+    luca, agus,
+    result,            // 'luca' | 'agus' | 'tie'
+    cumulative: { ...state.scores },
+    date: new Date().toISOString()
+  });
+  if(result !== 'tie') confetti();
+  // Reset to ready
+  state.phase = 'ready';
+  state.letter = null;
+  state.pending = { luca: 0, agus: 0 };
+  save();
+  render();
+  toast('ronda registrada');
+}
+
+function discardRound(){
+  if(!confirm('¿Descartar esta letra y volver a girar?')) return;
+  state.phase = 'ready';
+  state.letter = null;
+  state.pending = { luca: 0, agus: 0 };
+  save();
+  render();
+}
+
+function deleteHistoryAt(idx){
+  const h = state.history[idx];
+  if(!confirm(`¿Borrar la ronda #${h.round} (${h.letter})? También se le restará a los puntajes.`)) return;
+  // Subtract from scores
+  state.scores.luca -= h.luca;
+  state.scores.agus -= h.agus;
+  state.history.splice(idx, 1);
+  // Renumber rounds
+  state.history.forEach((r, i) => r.round = i + 1);
+  // Recompute cumulatives
+  let cumL = 0, cumA = 0;
+  state.history.forEach(r => {
+    cumL += r.luca; cumA += r.agus;
+    r.cumulative = { luca: cumL, agus: cumA };
+  });
+  save();
+  render();
+  toast('ronda eliminada');
+}
+
+/* ---------- Render ---------- */
+function render(){
+  // Scoreboard
+  document.getElementById('luca-name').textContent = state.settings.teamNames.luca;
+  document.getElementById('agus-name').textContent = state.settings.teamNames.agus;
+  document.getElementById('luca-score').textContent = state.scores.luca;
+  document.getElementById('agus-score').textContent = state.scores.agus;
+  const lWins = state.history.filter(h => h.result === 'luca').length;
+  const aWins = state.history.filter(h => h.result === 'agus').length;
+  document.getElementById('luca-meta').textContent = lWins + (lWins === 1 ? ' ganada' : ' ganadas');
+  document.getElementById('agus-meta').textContent = aWins + (aWins === 1 ? ' ganada' : ' ganadas');
+
+  // Main card
+  const main = document.getElementById('main-card');
+  if(state.phase === 'ready' || state.phase === 'spinning'){
+    main.innerHTML = renderReady();
+    afterReady();
+  } else {
+    main.innerHTML = renderLogged();
+    afterLogged();
+  }
+
+  renderHistory();
+}
+
+function renderReady(){
+  const total = ALL_LETTERS.length;
+  const enabled = state.settings.letters.length;
+  return `
+    <div class="wheel-area">
+      <div class="wheel-wrap">
+        <div class="wheel-pointer"></div>
+        ${buildWheelSVG()}
+      </div>
+      <p class="lead">
+        Hacé girar la ruleta para sacar la letra de la próxima ronda.<br>
+        <span style="font-size:13px; color:var(--ink-dim);">${enabled} de ${total} letras activas · cambialo en ⚙️</span>
+      </p>
+      <div class="actions">
+        <button class="btn primary" id="spin-btn">🎲 Girar la ruleta</button>
+      </div>
+    </div>
+  `;
+}
+function afterReady(){
+  const btn = document.getElementById('spin-btn');
+  if(btn) btn.addEventListener('click', startSpin);
+}
+
+function renderLogged(){
+  return `
+    <div class="logged">
+      <div class="big-letter">${state.letter}</div>
+      <h2 class="logged-title">
+        salió la <span class="letter-inline">${state.letter}</span>
+      </h2>
+      <p class="lead" style="margin-top:-4px;">
+        Jueguen la ronda en papel y volvé acá a cargar los puntos.
+      </p>
+
+      <div class="score-form">
+        <div class="col luca">
+          <label>${escapeHtml(state.settings.teamNames.luca)}</label>
+          <input type="number" min="0" step="1" id="pts-luca" value="${state.pending.luca}" inputmode="numeric">
+        </div>
+        <div class="vs">–</div>
+        <div class="col agus">
+          <label>${escapeHtml(state.settings.teamNames.agus)}</label>
+          <input type="number" min="0" step="1" id="pts-agus" value="${state.pending.agus}" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="winner-hint" id="winner-hint"></div>
+
+      <div class="actions">
+        <button class="btn go" id="save-btn">💾 Registrar ronda</button>
+        <button class="btn ghost" id="discard-btn">🎲 Girar de nuevo</button>
+      </div>
+    </div>
+  `;
+}
+function afterLogged(){
+  const lInp = document.getElementById('pts-luca');
+  const aInp = document.getElementById('pts-agus');
+  const hint = document.getElementById('winner-hint');
+
+  function refreshHint(){
+    const l = parseInt(lInp.value) || 0;
+    const a = parseInt(aInp.value) || 0;
+    state.pending = { luca: l, agus: a };
+    if(l === 0 && a === 0){
+      hint.innerHTML = '';
+    } else if(l === a){
+      hint.innerHTML = `<span class="who tie">empate</span> a ${l} puntos`;
+    } else if(l > a){
+      hint.innerHTML = `gana <span class="who luca">${escapeHtml(state.settings.teamNames.luca)}</span> por ${l - a}`;
+    } else {
+      hint.innerHTML = `gana <span class="who agus">${escapeHtml(state.settings.teamNames.agus)}</span> por ${a - l}`;
+    }
+  }
+  refreshHint();
+
+  [lInp, aInp].forEach(inp => {
+    inp.addEventListener('input', () => { refreshHint(); save(); });
+    inp.addEventListener('focus', () => inp.select());
+  });
+
+  document.getElementById('save-btn').addEventListener('click', saveRound);
+  document.getElementById('discard-btn').addEventListener('click', discardRound);
+}
+
+function renderHistory(){
+  // Stats
+  const stats = document.getElementById('h-stats');
+  const total = state.history.length;
+  const lWins = state.history.filter(h => h.result === 'luca').length;
+  const aWins = state.history.filter(h => h.result === 'agus').length;
+  const ties  = state.history.filter(h => h.result === 'tie').length;
+  stats.innerHTML = `
+    <div class="stat-card luca">
+      <div class="label">${escapeHtml(state.settings.teamNames.luca)}</div>
+      <div class="val">${lWins}</div>
+    </div>
+    <div class="stat-card middle">
+      <div class="label">Rondas</div>
+      <div class="val">${total}</div>
+    </div>
+    <div class="stat-card agus">
+      <div class="label">${escapeHtml(state.settings.teamNames.agus)}</div>
+      <div class="val">${aWins}</div>
+    </div>
+  `;
+
+  const list = document.getElementById('history-list');
+  if(!total){
+    list.innerHTML = `<div class="h-empty">— sin rondas todavía. ¡a girar! —</div>`;
+    return;
+  }
+  list.innerHTML = state.history.slice().reverse().map((h, idx) => {
+    const realIdx = state.history.length - 1 - idx;
+    const lWin = h.result === 'luca';
+    const aWin = h.result === 'agus';
+    const tie = h.result === 'tie';
+    const resultStr = tie ? 'empate' : (lWin ? '🏆 ' + state.settings.teamNames.luca : '🏆 ' + state.settings.teamNames.agus);
+    const resultCls = tie ? 'tie' : h.result;
+    return `
+      <div class="h-row">
+        <div class="num">#${h.round}</div>
+        <div class="h-letter">${h.letter}</div>
+        <div class="h-luca">
+          <span class="nm">${escapeHtml(state.settings.teamNames.luca)}</span>
+          <span class="pts ${lWin?'win':''}">${h.luca}</span>
+        </div>
+        <div class="h-agus">
+          <span class="nm">${escapeHtml(state.settings.teamNames.agus)}</span>
+          <span class="pts ${aWin?'win':''}">${h.agus}</span>
+        </div>
+        <div class="h-result ${resultCls}">${resultStr}</div>
+        <button class="del" data-i="${realIdx}" title="borrar">✕</button>
+      </div>
+    `;
+  }).join('');
+  list.querySelectorAll('.del').forEach(b => {
+    b.addEventListener('click', () => deleteHistoryAt(parseInt(b.dataset.i)));
+  });
+}
+
+/* ---------- Confetti ---------- */
+function confetti(){
+  const colors = ['#e63946','#f4b942','#52b788','#48cae4','#9d4edd','#f47862'];
+  for(let i = 0; i < 70; i++){
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random()*100 + 'vw';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDuration = (2 + Math.random()*2) + 's';
+    p.style.animationDelay = (Math.random()*0.4) + 's';
+    p.style.transform = `rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(p);
+    setTimeout(()=> p.remove(), 4500);
+  }
+}
+
+/* ---------- Settings ---------- */
+function openSettings(){
+  document.getElementById('name-luca').value = state.settings.teamNames.luca;
+  document.getElementById('name-agus').value = state.settings.teamNames.agus;
+  const lg = document.getElementById('letters-grid');
+  lg.innerHTML = ALL_LETTERS.map(L => {
+    const on = state.settings.letters.includes(L);
+    return `<button class="letter-toggle ${on?'on':''}" data-l="${L}">${L}</button>`;
+  }).join('');
+  lg.querySelectorAll('.letter-toggle').forEach(b => {
+    b.addEventListener('click', () => {
+      const L = b.dataset.l;
+      const idx = state.settings.letters.indexOf(L);
+      if(idx >= 0) state.settings.letters.splice(idx, 1);
+      else state.settings.letters.push(L);
+      save();
+      b.classList.toggle('on');
+      // Re-render wheel only if we're in ready phase (so user sees changes)
+      if(state.phase === 'ready'){
+        const wrap = document.querySelector('.wheel-wrap');
+        if(wrap) wrap.innerHTML = `<div class="wheel-pointer"></div>${buildWheelSVG()}`;
+      }
+    });
+  });
+  document.getElementById('settings-modal').classList.add('show');
+}
+function closeSettings(){
+  document.getElementById('settings-modal').classList.remove('show');
+}
+
+/* ---------- Wiring ---------- */
+document.getElementById('settings-btn').addEventListener('click', openSettings);
+document.getElementById('settings-close').addEventListener('click', closeSettings);
+document.getElementById('settings-modal').addEventListener('click', (e)=>{
+  if(e.target.id === 'settings-modal') closeSettings();
+});
+document.getElementById('name-luca').addEventListener('input', e => {
+  state.settings.teamNames.luca = e.target.value.trim() || 'Luca';
+  save();
+});
+document.getElementById('name-agus').addEventListener('input', e => {
+  state.settings.teamNames.agus = e.target.value.trim() || 'Agus';
+  save();
+});
+document.getElementById('clear-history').addEventListener('click', ()=>{
+  if(!confirm('¿Borrar todo el historial? También se reinician los puntajes.')) return;
+  state.history = [];
+  state.scores = { luca: 0, agus: 0 };
+  save(); render();
+  toast('historial borrado');
+});
+document.getElementById('reset-all').addEventListener('click', ()=>{
+  if(!confirm('¿Reiniciar todo? Se pierden ajustes, puntos e historial.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state = defaultState();
+  save(); closeSettings(); render();
+  toast('reiniciado');
+});
+
+/* Recover gracefully if we left mid-spinning */
+if(state.phase === 'spinning'){
+  state.phase = state.letter ? 'logged' : 'ready';
+}
+
+render();
+</script>
+
+</body>
+</html>

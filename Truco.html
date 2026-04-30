@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Truco – Luca vs Agus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood-darkest:#2a1606;
+    --wood-dark:#3e2412;
+    --wood:#5b3520;
+    --wood-light:#8b5a3c;
+    --wood-mid:#6e3e21;
+    --paper:#f4e4bc;
+    --paper-dark:#d4b986;
+    --paper-shadow:#b89860;
+    --match-wood:#d4a674;
+    --match-wood-dark:#a87444;
+    --match-tip:#a32424;
+    --match-tip-dark:#5a0c0c;
+    --ink:#3a1f0a;
+    --leaf:#3a5a2c;
+    --leaf-light:#5a8a3c;
+    --gold:#d6a13a;
+    --copper:#b8762d;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  html,body{min-height:100%;}
+
+  body{
+    font-family:'Caveat', cursive;
+    color:var(--paper);
+    padding:24px 18px 40px;
+    background:
+      /* fine vertical grain */
+      repeating-linear-gradient(90deg,
+        rgba(0,0,0,.05) 0, rgba(0,0,0,.05) 1px,
+        transparent 1px, transparent 4px),
+      /* coarser grain */
+      repeating-linear-gradient(90deg,
+        rgba(255,255,255,.025) 0, rgba(255,255,255,.025) 2px,
+        transparent 2px, transparent 50px),
+      /* warm spotlight */
+      radial-gradient(ellipse at 30% 15%, #7a4525 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 85%, #4a2810 0%, transparent 60%),
+      linear-gradient(180deg, #5b3520 0%, #3e2412 100%);
+    background-attachment: fixed;
+  }
+
+  /* Wood knots */
+  body::before, body::after{
+    content:'';
+    position:fixed;
+    border-radius:50%;
+    pointer-events:none;
+    z-index:0;
+    opacity:.55;
+  }
+  body::before{
+    width:140px;height:90px;
+    top:8%;left:4%;
+    background:radial-gradient(ellipse at center, #1d0d02 15%, transparent 70%);
+    transform:rotate(18deg);
+  }
+  body::after{
+    width:100px;height:70px;
+    bottom:6%;right:5%;
+    background:radial-gradient(ellipse at center, #1d0d02 15%, transparent 70%);
+    transform:rotate(-22deg);
+  }
+
+  .app{ position:relative; z-index:1; max-width:1200px; margin:0 auto; }
+
+  /* ---------- Header ---------- */
+  .header{ text-align:center; margin-bottom:18px; }
+  .header h1{
+    font-family:'Rye', serif;
+    font-size:clamp(34px, 6vw, 58px);
+    color:var(--paper);
+    text-shadow:
+      2px 2px 0 var(--wood-darkest),
+      4px 4px 0 var(--wood-mid),
+      6px 8px 12px rgba(0,0,0,.55);
+    letter-spacing:2px;
+    line-height:1.05;
+  }
+  .header .sub{
+    font-family:'Caveat', cursive;
+    font-size:clamp(18px, 2.4vw, 28px);
+    color:var(--paper-dark);
+    margin-top:2px;
+    font-style:italic;
+    letter-spacing:1px;
+  }
+  .header .ornament{
+    color:var(--gold);
+    font-family:'Rye', serif;
+    margin:4px 0 0;
+    font-size:14px;
+    letter-spacing:6px;
+  }
+
+  /* ---------- Board ---------- */
+  .board{
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    gap:20px;
+    align-items:stretch;
+    margin-bottom:22px;
+  }
+  @media (max-width: 920px){
+    .board{ grid-template-columns:1fr; }
+    .center{ order:0; }
+  }
+
+  /* ---------- Team panel (parchment) ---------- */
+  .team-panel{
+    position:relative;
+    background:
+      radial-gradient(ellipse at 30% 10%, #fff5d6 0%, var(--paper) 35%, var(--paper-dark) 100%);
+    border:6px double var(--wood-dark);
+    border-radius:14px;
+    padding:22px 18px 24px;
+    box-shadow:
+      0 14px 30px rgba(0,0,0,.55),
+      inset 0 0 35px rgba(120,80,40,.28);
+    color:var(--ink);
+  }
+  .team-panel::before{
+    content:'';
+    position:absolute;
+    inset:6px;
+    border:1px dashed rgba(58,31,10,.45);
+    border-radius:8px;
+    pointer-events:none;
+  }
+  .team-panel.luca-side{ background:radial-gradient(ellipse at 30% 10%, #fff5d6 0%, var(--paper) 35%, var(--paper-dark) 100%); }
+  .team-panel.agus-side{ background:radial-gradient(ellipse at 70% 10%, #fff5d6 0%, var(--paper) 35%, var(--paper-dark) 100%); }
+
+  .team-name{
+    font-family:'Rye', serif;
+    font-size:clamp(28px, 3.6vw, 40px);
+    text-align:center;
+    color:var(--wood-dark);
+    letter-spacing:2px;
+    text-shadow:1px 1px 0 rgba(255,255,255,.5);
+  }
+  .team-name .editable{
+    cursor:text;
+    border-bottom:2px dotted transparent;
+    padding:0 6px;
+    transition:border-color .2s, background .2s;
+    border-radius:4px;
+  }
+  .team-name .editable:hover{ border-color:var(--wood-dark); background:rgba(255,255,255,.25); }
+  .team-name .editable:focus{ outline:none; border-color:var(--match-tip); background:rgba(255,255,255,.35); }
+
+  .label-tag{
+    display:block;
+    text-align:center;
+    font-family:'Special Elite', serif;
+    font-size:13px;
+    color:var(--wood);
+    letter-spacing:2px;
+    text-transform:uppercase;
+    margin-top:2px;
+    opacity:.75;
+  }
+
+  .score-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    margin:14px 0 14px;
+  }
+  .score-btn{
+    width:62px; height:62px;
+    border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, var(--match-wood) 0%, var(--wood-light) 55%, var(--wood-dark) 100%);
+    border:3px solid var(--wood-darkest);
+    color:var(--paper);
+    font-size:38px;
+    font-family:'Rye', serif;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow:
+      0 5px 10px rgba(0,0,0,.45),
+      inset 0 -4px 0 rgba(0,0,0,.25),
+      inset 0 2px 0 rgba(255,255,255,.15);
+    transition:transform .08s ease, box-shadow .08s ease;
+    user-select:none;
+    display:flex; align-items:center; justify-content:center;
+    line-height:1;
+    text-shadow:1px 1px 0 rgba(0,0,0,.4);
+  }
+  .score-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:
+      0 7px 14px rgba(0,0,0,.55),
+      inset 0 -4px 0 rgba(0,0,0,.25),
+      inset 0 2px 0 rgba(255,255,255,.15);
+  }
+  .score-btn:active{
+    transform:translateY(2px);
+    box-shadow:
+      0 2px 4px rgba(0,0,0,.4),
+      inset 0 -1px 0 rgba(0,0,0,.2),
+      inset 0 2px 0 rgba(255,255,255,.1);
+  }
+  .score-btn.minus{
+    background:radial-gradient(circle at 30% 30%, #c4a37a 0%, #6b4423 55%, #2a1505 100%);
+  }
+
+  .score-display{
+    font-family:'Rye', serif;
+    font-size:clamp(70px, 9vw, 96px);
+    color:var(--wood-dark);
+    min-width:120px;
+    text-align:center;
+    text-shadow:2px 2px 0 rgba(255,255,255,.4), 3px 3px 0 rgba(120,80,40,.18);
+    line-height:1;
+  }
+
+  /* ---------- Match-stick board ---------- */
+  .matches{
+    display:grid;
+    grid-template-rows:auto auto;
+    gap:22px;
+    padding:18px 8px 16px;
+    background:
+      repeating-linear-gradient(0deg,
+        rgba(120,80,40,.08) 0, rgba(120,80,40,.08) 1px,
+        transparent 1px, transparent 24px),
+      rgba(255,255,255,.18);
+    border-radius:10px;
+    border:1px solid rgba(58,31,10,.25);
+    position:relative;
+  }
+
+  .match-row{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:18px;
+    align-items:center;
+    justify-items:center;
+    position:relative;
+    padding-bottom:2px;
+  }
+  .match-row.first{
+    border-bottom:2px dashed var(--wood);
+    padding-bottom:18px;
+  }
+  .match-row.first::after{
+    content:'mitad — 15';
+    position:absolute;
+    bottom:-12px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:13px;
+    font-family:'Special Elite', serif;
+    color:var(--wood-dark);
+    background:var(--paper);
+    padding:1px 10px;
+    letter-spacing:2px;
+    border-radius:4px;
+    border:1px solid rgba(58,31,10,.35);
+    white-space:nowrap;
+  }
+
+  .square{
+    width:84px;
+    height:84px;
+    display:block;
+  }
+
+  /* Match-sticks: aparecen con un fade simple (compatible y sin bugs de SVG) */
+  .square .stick{
+    stroke:url(#stickGrad);
+    stroke-width:5.5;
+    stroke-linecap:round;
+    fill:none;
+    opacity:0;
+    transition: opacity .28s ease;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,.25));
+  }
+  .square .stick.show{ opacity:1; }
+
+  .square .tip{
+    fill:url(#tipGrad);
+    opacity:0;
+    transition:opacity .28s ease .14s;
+  }
+  .square .tip.show{ opacity:1; }
+
+  /* ---------- Center column ---------- */
+  .center{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    min-width:200px;
+    padding:6px;
+  }
+  .vs{
+    font-family:'Rye', serif;
+    font-size:54px;
+    color:var(--gold);
+    text-shadow:2px 2px 0 var(--wood-dark), 4px 4px 8px rgba(0,0,0,.5);
+    letter-spacing:4px;
+  }
+  .target{
+    background:var(--paper);
+    color:var(--ink);
+    padding:8px 18px 10px;
+    border-radius:10px;
+    border:3px double var(--wood-dark);
+    font-family:'Special Elite', serif;
+    text-align:center;
+    box-shadow:0 6px 14px rgba(0,0,0,.4);
+  }
+  .target .lbl{ font-size:13px; letter-spacing:2px; text-transform:uppercase; opacity:.75; }
+  .target .num{ font-size:40px; color:var(--match-tip); font-family:'Rye', serif; line-height:1; }
+  .mate-svg{
+    width:140px; height:140px;
+    filter:drop-shadow(2px 6px 10px rgba(0,0,0,.6));
+    animation:matefloat 5s ease-in-out infinite;
+  }
+  @keyframes matefloat{
+    0%,100%{ transform:translateY(0) rotate(-2deg); }
+    50%{ transform:translateY(-6px) rotate(2deg); }
+  }
+  .center .lead{
+    text-align:center;
+    font-family:'Caveat', cursive;
+    font-size:24px;
+    color:var(--paper-dark);
+    line-height:1.1;
+    min-height:30px;
+  }
+  .center .lead .name{ color:var(--gold); font-weight:700; }
+
+  /* ---------- Controls ---------- */
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    justify-content:center;
+    margin:8px 0 28px;
+  }
+  .btn{
+    font-family:'Rye', serif;
+    font-size:18px;
+    background:linear-gradient(180deg, var(--match-wood) 0%, var(--wood-light) 60%, var(--wood) 100%);
+    color:var(--paper);
+    border:3px solid var(--wood-darkest);
+    border-radius:10px;
+    padding:10px 18px;
+    cursor:pointer;
+    letter-spacing:1.5px;
+    text-shadow:1px 1px 0 var(--wood-darkest);
+    box-shadow:0 5px 10px rgba(0,0,0,.45), inset 0 -3px 0 rgba(0,0,0,.2);
+    transition:transform .1s, box-shadow .1s;
+  }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 7px 14px rgba(0,0,0,.5), inset 0 -3px 0 rgba(0,0,0,.2);}
+  .btn:active{ transform:translateY(2px); box-shadow:0 2px 4px rgba(0,0,0,.4), inset 0 -1px 0 rgba(0,0,0,.15);}
+  .btn.danger{ background:linear-gradient(180deg, #c4624a 0%, #8b3a2a 60%, #5a1f15 100%); }
+  .btn.success{ background:linear-gradient(180deg, #6a8a4a 0%, #3a5a2c 60%, #1a3010 100%); }
+  .btn.gold{ background:linear-gradient(180deg, #e6b95a 0%, #c0892a 60%, #8a5a18 100%); }
+
+  /* ---------- History ---------- */
+  .history{
+    background:radial-gradient(ellipse at 50% 0%, #fff5d6 0%, var(--paper) 35%, var(--paper-dark) 100%);
+    border:6px double var(--wood-dark);
+    border-radius:14px;
+    padding:22px 22px 18px;
+    color:var(--ink);
+    box-shadow:0 14px 30px rgba(0,0,0,.55), inset 0 0 35px rgba(120,80,40,.25);
+    position:relative;
+  }
+  .history::before{
+    content:'';
+    position:absolute; inset:6px;
+    border:1px dashed rgba(58,31,10,.4);
+    border-radius:8px; pointer-events:none;
+  }
+  .history h2{
+    font-family:'Rye', serif;
+    font-size:30px;
+    color:var(--wood-dark);
+    text-align:center;
+    margin-bottom:14px;
+    letter-spacing:3px;
+    text-shadow:1px 1px 0 rgba(255,255,255,.4);
+  }
+
+  .summary{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:14px;
+    margin-bottom:18px;
+  }
+  @media (max-width:560px){ .summary{ grid-template-columns:1fr; } }
+  .stat-card{
+    background:rgba(255,255,255,.4);
+    border:2px solid var(--wood-dark);
+    border-radius:10px;
+    padding:14px 10px;
+    text-align:center;
+    box-shadow:inset 0 0 16px rgba(120,80,40,.15);
+  }
+  .stat-card .label{
+    font-family:'Special Elite', serif;
+    font-size:14px;
+    color:var(--wood-dark);
+    text-transform:uppercase;
+    letter-spacing:2px;
+  }
+  .stat-card .val{
+    font-family:'Rye', serif;
+    font-size:46px;
+    color:var(--match-tip);
+    line-height:1;
+    margin-top:6px;
+    text-shadow:1px 1px 0 rgba(255,255,255,.3);
+  }
+  .stat-card .small{
+    font-size:14px;
+    color:var(--wood);
+    margin-top:6px;
+    font-family:'Special Elite', serif;
+  }
+  .stat-card.luca .val{ color:#a32424; }
+  .stat-card.agus .val{ color:#3a5a2c; }
+
+  .chart-wrap{
+    background:rgba(255,255,255,.42);
+    border:2px solid var(--wood-dark);
+    border-radius:10px;
+    padding:8px 10px 6px;
+    box-shadow:inset 0 0 16px rgba(120,80,40,.15);
+  }
+  #chart{ width:100%; height:320px; display:block; }
+
+  .game-list{
+    margin-top:18px;
+    max-height:280px;
+    overflow-y:auto;
+    background:rgba(255,255,255,.35);
+    border:2px solid var(--wood-dark);
+    border-radius:10px;
+    padding:8px 14px;
+    box-shadow:inset 0 0 16px rgba(120,80,40,.15);
+  }
+  .game-list::-webkit-scrollbar{ width:8px; }
+  .game-list::-webkit-scrollbar-track{ background:rgba(58,31,10,.1); border-radius:4px; }
+  .game-list::-webkit-scrollbar-thumb{ background:var(--wood); border-radius:4px; }
+
+  .game-row{
+    display:grid;
+    grid-template-columns:70px 1fr 110px 1fr 90px 30px;
+    gap:10px;
+    align-items:center;
+    padding:8px 4px;
+    border-bottom:1px dashed rgba(58,31,10,.3);
+    color:var(--wood-dark);
+  }
+  .game-row:last-child{ border-bottom:none; }
+  .game-row .date{ font-family:'Special Elite', serif; font-size:12px; opacity:.75; line-height:1.2; }
+  .game-row .luca{ text-align:right; font-size:22px; font-family:'Caveat',cursive; }
+  .game-row .agus{ text-align:left; font-size:22px; font-family:'Caveat',cursive; }
+  .game-row .luca.win, .game-row .agus.win{ font-weight:700; color:var(--match-tip); }
+  .game-row .scores{
+    font-family:'Rye', serif;
+    font-size:24px;
+    text-align:center;
+    color:var(--wood-dark);
+    text-shadow:1px 1px 0 rgba(255,255,255,.3);
+  }
+  .game-row .winner{
+    font-family:'Special Elite', serif;
+    color:var(--match-tip);
+    text-align:center;
+    font-size:14px;
+    letter-spacing:1px;
+  }
+  .game-row .del{
+    background:transparent; border:none; cursor:pointer;
+    color:var(--wood); font-size:18px; opacity:.5;
+  }
+  .game-row .del:hover{ opacity:1; color:var(--match-tip); }
+
+  .empty-msg{
+    text-align:center;
+    font-family:'Special Elite', serif;
+    color:var(--wood);
+    padding:20px;
+    font-size:15px;
+    letter-spacing:1px;
+  }
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed;
+    top:24px; left:50%;
+    transform:translateX(-50%) translateY(-120px);
+    background:var(--paper);
+    color:var(--ink);
+    padding:12px 22px;
+    border:3px double var(--wood-dark);
+    border-radius:8px;
+    font-family:'Special Elite', serif;
+    font-size:17px;
+    letter-spacing:1px;
+    z-index:300;
+    transition:transform .35s cubic-bezier(.2,.9,.4,1.1);
+    box-shadow:0 10px 24px rgba(0,0,0,.5);
+  }
+  .toast.show{ transform:translateX(-50%) translateY(0); }
+
+  /* ---------- Winner banner ---------- */
+  .winner-banner{
+    position:fixed; inset:0;
+    background:rgba(20,10,2,.88);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:18px;
+    z-index:200;
+    backdrop-filter: blur(2px);
+  }
+  .winner-banner.show{ display:flex; animation:fadein .4s ease; }
+  @keyframes fadein{ from{ opacity:0; } to{ opacity:1; } }
+  .winner-banner h1{
+    font-family:'Rye', serif;
+    font-size:clamp(48px, 8vw, 84px);
+    color:var(--gold);
+    text-shadow:4px 4px 0 var(--wood-dark), 6px 6px 14px rgba(0,0,0,.7);
+    text-align:center;
+    animation:pulse 1.4s infinite ease-in-out;
+    padding:0 16px;
+  }
+  @keyframes pulse{ 0%,100%{ transform:scale(1) rotate(-1deg);} 50%{ transform:scale(1.06) rotate(1deg);} }
+  .winner-banner .scoreline{
+    font-family:'Rye', serif;
+    font-size:42px;
+    color:var(--paper);
+    letter-spacing:6px;
+  }
+  .winner-banner .actions{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+
+  /* ---------- Confetti ---------- */
+  .confetti-piece{
+    position:fixed;
+    width:10px; height:14px;
+    top:-20px;
+    z-index:250;
+    animation: fall 2.6s ease-in forwards;
+    pointer-events:none;
+  }
+  @keyframes fall{
+    0%{ transform: translateY(0) rotate(0); opacity:1; }
+    100%{ transform: translateY(110vh) rotate(720deg); opacity:.4; }
+  }
+
+  /* ---------- Footer ---------- */
+  .foot{
+    text-align:center;
+    margin-top:18px;
+    font-family:'Special Elite', serif;
+    color:var(--paper-dark);
+    font-size:13px;
+    letter-spacing:2px;
+    opacity:.7;
+  }
+  .kbd{
+    display:inline-block;
+    background:var(--paper);
+    color:var(--ink);
+    padding:1px 6px;
+    border-radius:4px;
+    font-family:monospace;
+    font-size:12px;
+    border:1px solid var(--wood);
+    margin:0 2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- SVG defs (gradients) shared across all squares -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- userSpaceOnUse: el gradient ya no depende del bounding box del trazo,
+         así también funciona en líneas perfectamente horizontales/verticales -->
+    <linearGradient id="stickGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="84" y2="84">
+      <stop offset="0%"   stop-color="#e1b889"/>
+      <stop offset="50%"  stop-color="#c8975e"/>
+      <stop offset="100%" stop-color="#a87444"/>
+    </linearGradient>
+    <radialGradient id="tipGrad" cx="0.35" cy="0.35" r="0.7">
+      <stop offset="0%"  stop-color="#e84a4a"/>
+      <stop offset="55%" stop-color="#a32424"/>
+      <stop offset="100%" stop-color="#5a0c0c"/>
+    </radialGradient>
+  </defs>
+</svg>
+
+<div class="app">
+
+  <header class="header">
+    <h1>🧉 Truco 🧉</h1>
+    <p class="sub">— La mesa de Luca y Agus —</p>
+    <p class="ornament">✦ ✦ ✦</p>
+  </header>
+
+  <section class="board">
+    <!-- LUCA -->
+    <article class="team-panel luca-side">
+      <div class="team-name">
+        <span class="editable" contenteditable="true" spellcheck="false" data-team="luca">Luca</span>
+      </div>
+      <span class="label-tag">Equipo I</span>
+
+      <div class="score-row">
+        <button class="score-btn minus" data-team="luca" data-delta="-1" aria-label="Restar punto Luca">−</button>
+        <div class="score-display" id="luca-score">0</div>
+        <button class="score-btn plus" data-team="luca" data-delta="1" aria-label="Sumar punto Luca">+</button>
+      </div>
+
+      <div class="matches" id="luca-matches"></div>
+    </article>
+
+    <!-- CENTER -->
+    <div class="center">
+      <svg class="mate-svg" viewBox="0 0 100 100" aria-hidden="true">
+        <!-- Steam wisps -->
+        <path d="M68 15 q-2 -6 2 -10 q3 -3 0 -8" stroke="rgba(245,222,179,.6)" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <path d="M75 12 q3 -5 -1 -9" stroke="rgba(245,222,179,.4)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <!-- Mate gourd shadow -->
+        <ellipse cx="50" cy="92" rx="26" ry="3" fill="rgba(0,0,0,.35)"/>
+        <!-- Mate gourd body -->
+        <path d="M22 60 Q22 92 50 95 Q78 92 78 60 Q78 47 65 45 L35 45 Q22 47 22 60 Z" fill="#5a3a1f" stroke="#2a1505" stroke-width="2"/>
+        <!-- Highlight -->
+        <path d="M30 55 Q32 75 42 85" fill="none" stroke="rgba(255,220,170,.18)" stroke-width="6" stroke-linecap="round"/>
+        <!-- Decoration band -->
+        <path d="M25 70 Q50 78 75 70" fill="none" stroke="#c08a3d" stroke-width="2"/>
+        <path d="M27 75 Q50 82 73 75" fill="none" stroke="#c08a3d" stroke-width="1.2" opacity=".7"/>
+        <!-- Yerba inside -->
+        <ellipse cx="50" cy="46" rx="18" ry="5" fill="#3a5a2c" stroke="#2a1505" stroke-width="0.8"/>
+        <circle cx="42" cy="46" r="1.4" fill="#5a8a3c"/>
+        <circle cx="50" cy="47" r="1.2" fill="#4a7a2c"/>
+        <circle cx="56" cy="45" r="1.3" fill="#6a9a4c"/>
+        <circle cx="46" cy="44" r="0.8" fill="#3a5a2c"/>
+        <!-- Bombilla -->
+        <line x1="60" y1="48" x2="80" y2="14" stroke="#9a9a9a" stroke-width="3.6" stroke-linecap="round"/>
+        <line x1="60" y1="48" x2="80" y2="14" stroke="#d6d6d6" stroke-width="1.5" stroke-linecap="round"/>
+        <ellipse cx="80" cy="12" rx="5" ry="3.2" fill="#d6d6d6" stroke="#7a7a7a" stroke-width="1"/>
+        <ellipse cx="80" cy="12" rx="2" ry="1.4" fill="#5a5a5a"/>
+      </svg>
+
+      <div class="vs">VS</div>
+
+      <div class="target">
+        <div class="lbl">partida a</div>
+        <div class="num">30</div>
+        <div class="lbl">puntos</div>
+      </div>
+
+      <div class="lead" id="lead">¡Dale, que arrancamos!</div>
+    </div>
+
+    <!-- AGUS -->
+    <article class="team-panel agus-side">
+      <div class="team-name">
+        <span class="editable" contenteditable="true" spellcheck="false" data-team="agus">Agus</span>
+      </div>
+      <span class="label-tag">Equipo II</span>
+
+      <div class="score-row">
+        <button class="score-btn minus" data-team="agus" data-delta="-1" aria-label="Restar punto Agus">−</button>
+        <div class="score-display" id="agus-score">0</div>
+        <button class="score-btn plus" data-team="agus" data-delta="1" aria-label="Sumar punto Agus">+</button>
+      </div>
+
+      <div class="matches" id="agus-matches"></div>
+    </article>
+  </section>
+
+  <div class="controls">
+    <button class="btn success" id="save-btn">📜 Guardar partida</button>
+    <button class="btn danger" id="reset-btn">🔄 Nueva partida</button>
+    <button class="btn" id="export-btn">⬇️ Exportar historial</button>
+    <button class="btn" id="import-btn">⬆️ Importar</button>
+    <input type="file" id="import-file" accept=".json" hidden>
+  </div>
+
+  <section class="history">
+    <h2>📊 Tablero global</h2>
+
+    <div class="summary" id="summary"></div>
+
+    <div class="chart-wrap">
+      <svg id="chart" viewBox="0 0 800 320" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div class="game-list" id="game-list"></div>
+  </section>
+
+  <p class="foot">
+    atajos: <span class="kbd">Q</span>/<span class="kbd">A</span> +/− Luca · <span class="kbd">P</span>/<span class="kbd">L</span> +/− Agus · click en el nombre para editar
+  </p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="winner-banner" id="winner-banner">
+  <h1 id="winner-title">¡Ganó!</h1>
+  <div class="scoreline" id="winner-score"></div>
+  <div class="actions">
+    <button class="btn gold" id="winner-save">💾 Guardar y nueva partida</button>
+    <button class="btn" id="winner-keep">Seguir mirando</button>
+  </div>
+</div>
+
+<script>
+  /* ====== Persistence ====== */
+  const STORAGE_KEY = 'truco-blitz-state-v2';
+  const TARGET = 30;
+
+  const defaultState = () => ({
+    teamNames: { luca: 'Luca', agus: 'Agus' },
+    current:   { luca: 0, agus: 0, startedAt: null },
+    history:   []   // [{date, luca, agus, winner, lucaName, agusName}]
+  });
+
+  let state = defaultState();
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      state = { ...defaultState(), ...saved,
+                teamNames:{ ...defaultState().teamNames, ...(saved.teamNames||{}) },
+                current:  { ...defaultState().current,   ...(saved.current||{}) } };
+    }
+  } catch (_) {}
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+  }
+
+  /* ====== Score handling ====== */
+  function adjust(team, delta) {
+    if (!state.current.startedAt) state.current.startedAt = Date.now();
+    const next = Math.max(0, Math.min(TARGET, state.current[team] + delta));
+    if (next === state.current[team]) return;
+    state.current[team] = next;
+    save();
+    render();
+    if (next === TARGET) showWinner(team);
+  }
+
+  /* ====== Render: match-stick squares ====== */
+  // Each square is 5 sticks: bot, rgt, top, lft, dia (in that drawing order).
+  // 6 squares = 30 points. Row 1 (3 squares) = mitad (15).
+  const STICK_DEFS = [
+    // bottom: left -> right (head on right)
+    { d:'M8 76 L76 76',   tipX:76, tipY:76 },
+    // right: bottom -> top (head on top)
+    { d:'M76 76 L76 8',   tipX:76, tipY:8  },
+    // top: right -> left (head on left)
+    { d:'M76 8 L8 8',     tipX:8,  tipY:8  },
+    // left: top -> bottom (head on bottom)
+    { d:'M8 8 L8 76',     tipX:8,  tipY:76 },
+    // diagonal: top-left -> bottom-right (head on bottom-right)
+    { d:'M10 10 L74 74',  tipX:74, tipY:74 }
+  ];
+
+  function buildSquare(filledPoints) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'square');
+    svg.setAttribute('viewBox', '0 0 84 84');
+    STICK_DEFS.forEach((m, i) => {
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('class', 'stick' + (i < filledPoints ? ' show' : ''));
+      path.setAttribute('d', m.d);
+      svg.appendChild(path);
+
+      const tip = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      tip.setAttribute('class', 'tip' + (i < filledPoints ? ' show' : ''));
+      tip.setAttribute('cx', m.tipX);
+      tip.setAttribute('cy', m.tipY);
+      tip.setAttribute('r', 4);
+      svg.appendChild(tip);
+    });
+    return svg;
+  }
+
+  function renderMatches(team) {
+    const container = document.getElementById(team + '-matches');
+    container.innerHTML = '';
+    const score = state.current[team];
+
+    for (let row = 0; row < 2; row++) {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'match-row' + (row === 0 ? ' first' : '');
+      for (let col = 0; col < 3; col++) {
+        const sqIdx = row * 3 + col;
+        const filled = Math.max(0, Math.min(5, score - sqIdx * 5));
+        rowEl.appendChild(buildSquare(filled));
+      }
+      container.appendChild(rowEl);
+    }
+  }
+
+  /* ====== Lead/whose-winning text ====== */
+  function renderLead() {
+    const l = state.current.luca, a = state.current.agus;
+    const lead = document.getElementById('lead');
+    if (l === 0 && a === 0) {
+      lead.innerHTML = `¡Dale, que arrancamos!`;
+    } else if (l === a) {
+      lead.innerHTML = `Empatados <span class="name">${l}</span>`;
+    } else if (l > a) {
+      lead.innerHTML = `<span class="name">${state.teamNames.luca}</span> arriba ${l}–${a}`;
+    } else {
+      lead.innerHTML = `<span class="name">${state.teamNames.agus}</span> arriba ${a}–${l}`;
+    }
+  }
+
+  /* ====== Main render ====== */
+  function render() {
+    document.getElementById('luca-score').textContent = state.current.luca;
+    document.getElementById('agus-score').textContent = state.current.agus;
+
+    const lucaEl = document.querySelector('[data-team="luca"].editable');
+    const agusEl = document.querySelector('[data-team="agus"].editable');
+    if (document.activeElement !== lucaEl) lucaEl.textContent = state.teamNames.luca;
+    if (document.activeElement !== agusEl) agusEl.textContent = state.teamNames.agus;
+
+    renderMatches('luca');
+    renderMatches('agus');
+    renderLead();
+    renderHistory();
+  }
+
+  /* ====== Winner overlay & confetti ====== */
+  function showWinner(team) {
+    const banner = document.getElementById('winner-banner');
+    document.getElementById('winner-title').textContent = '¡Ganó ' + state.teamNames[team] + '!';
+    document.getElementById('winner-score').textContent = state.current.luca + '   –   ' + state.current.agus;
+    banner.classList.add('show');
+    confetti();
+  }
+
+  function confetti() {
+    const colors = ['#a32424','#3a5a2c','#d6a13a','#f4e4bc','#b8762d'];
+    for (let i = 0; i < 80; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+      piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+      piece.style.animationDelay = (Math.random() * 0.5) + 's';
+      piece.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 4000);
+    }
+  }
+
+  /* ====== Save / reset / history ====== */
+  function saveCurrentAsHistory() {
+    if (state.current.luca === 0 && state.current.agus === 0) {
+      toast('Nada para guardar, che');
+      return;
+    }
+    const winner = state.current.luca > state.current.agus ? 'luca'
+                 : state.current.agus > state.current.luca ? 'agus' : 'empate';
+    state.history.push({
+      date: new Date().toISOString(),
+      luca: state.current.luca,
+      agus: state.current.agus,
+      winner,
+      lucaName: state.teamNames.luca,
+      agusName: state.teamNames.agus
+    });
+    state.current = { luca: 0, agus: 0, startedAt: null };
+    save(); render();
+    toast('Partida guardada en el tablero');
+  }
+
+  function resetCurrent(force) {
+    if (!force && (state.current.luca > 0 || state.current.agus > 0)) {
+      if (!confirm('¿Descartar la partida actual sin guardar?')) return;
+    }
+    state.current = { luca: 0, agus: 0, startedAt: null };
+    save(); render();
+    toast('Nueva partida — ¡a jugar!');
+  }
+
+  function deleteHistoryAt(idx) {
+    if (!confirm('¿Borrar esta partida del historial?')) return;
+    state.history.splice(idx, 1);
+    save(); render();
+    toast('Partida eliminada');
+  }
+
+  /* ====== Toast ====== */
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  /* ====== Stats / chart / list ====== */
+  function renderHistory() {
+    const lucaWins = state.history.filter(g => g.winner === 'luca').length;
+    const agusWins = state.history.filter(g => g.winner === 'agus').length;
+    const empates  = state.history.filter(g => g.winner === 'empate').length;
+    const total    = state.history.length;
+
+    document.getElementById('summary').innerHTML = `
+      <div class="stat-card luca">
+        <div class="label">${escape(state.teamNames.luca)}</div>
+        <div class="val">${lucaWins}</div>
+        <div class="small">${total ? Math.round(lucaWins*100/total) : 0}% — victorias</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Partidas</div>
+        <div class="val">${total}</div>
+        <div class="small">${empates} empate${empates===1?'':'s'}</div>
+      </div>
+      <div class="stat-card agus">
+        <div class="label">${escape(state.teamNames.agus)}</div>
+        <div class="val">${agusWins}</div>
+        <div class="small">${total ? Math.round(agusWins*100/total) : 0}% — victorias</div>
+      </div>
+    `;
+
+    drawChart();
+    drawList();
+  }
+
+  function escape(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  /* ====== SVG Chart: bar chart head-to-head Luca vs Agus ====== */
+  function drawChart() {
+    const svg = document.getElementById('chart');
+    const w = 800, h = 320;
+    const pad = { l: 60, r: 60, t: 40, b: 84 };
+    const innerW = w - pad.l - pad.r;
+    const innerH = h - pad.t - pad.b;
+
+    let html = `<rect x="0" y="0" width="${w}" height="${h}" fill="rgba(244,228,188,0.35)"/>`;
+
+    if (state.history.length === 0) {
+      html += `<text x="${w/2}" y="${h/2}" text-anchor="middle" font-family="Special Elite" font-size="20" fill="#5b3520">— sin partidas todavía. ¡que empiece la primera! —</text>`;
+      svg.innerHTML = html;
+      return;
+    }
+
+    const lucaWins = state.history.filter(g => g.winner === 'luca').length;
+    const agusWins = state.history.filter(g => g.winner === 'agus').length;
+    const lucaPts  = state.history.reduce((s,g) => s + g.luca, 0);
+    const agusPts  = state.history.reduce((s,g) => s + g.agus, 0);
+
+    const maxWins = Math.max(lucaWins, agusWins, 1);
+    const baseY = pad.t + innerH;
+    const barW  = 140;
+    const lucaX = pad.l + innerW * 0.28 - barW/2;
+    const agusX = pad.l + innerW * 0.72 - barW/2;
+    const lucaH = (lucaWins / maxWins) * innerH;
+    const agusH = (agusWins / maxWins) * innerH;
+
+    // Title
+    html += `<text x="${w/2}" y="24" text-anchor="middle" font-family="Rye" font-size="20" fill="#3e2412" letter-spacing="3">VICTORIAS — MANO A MANO</text>`;
+
+    // Y axis ticks
+    const tickStep = Math.max(1, Math.ceil(maxWins / 5));
+    for (let i = 0; i <= maxWins; i += tickStep) {
+      const yy = baseY - (i / maxWins) * innerH;
+      html += `<line x1="${pad.l-10}" y1="${yy}" x2="${w-pad.r+10}" y2="${yy}" stroke="#5b3520" stroke-width="0.5" stroke-dasharray="3,3" opacity=".35"/>`;
+      html += `<text x="${pad.l-16}" y="${yy+4}" text-anchor="end" font-family="Special Elite" font-size="13" fill="#3e2412">${i}</text>`;
+    }
+    // Baseline (mesa)
+    html += `<line x1="${pad.l-10}" y1="${baseY}" x2="${w-pad.r+10}" y2="${baseY}" stroke="#3e2412" stroke-width="2.5"/>`;
+
+    // Helper: draw a bar with wood-grain shading + label
+    function drawBar(x, height, fillMain, fillDark, stroke, value, name, points, isWinner) {
+      let s = '';
+      const minH = 2; // visible nub even if 0 wins
+      const visH = Math.max(height, minH);
+      const topY = baseY - visH;
+
+      // Bar with rounded top corners (rect + clip via rx)
+      s += `<rect x="${x}" y="${topY}" width="${barW}" height="${visH}" fill="${fillMain}" stroke="${stroke}" stroke-width="2.5" rx="5"/>`;
+      // Highlight stripe (left side)
+      s += `<rect x="${x+5}" y="${topY+4}" width="6" height="${Math.max(0, visH-8)}" fill="rgba(255,255,255,.18)" rx="3"/>`;
+      // Wood grain streaks
+      if (visH > 16){
+        for (let i = 0; i < 3; i++) {
+          const xi = x + 24 + i * (barW - 40) / 2;
+          s += `<line x1="${xi}" y1="${topY+6}" x2="${xi}" y2="${baseY-6}" stroke="rgba(0,0,0,.18)" stroke-width="1"/>`;
+        }
+      }
+      // Bottom shadow band
+      s += `<rect x="${x}" y="${baseY-6}" width="${barW}" height="6" fill="${fillDark}" opacity=".7" rx="0"/>`;
+      // Value on top of bar
+      s += `<text x="${x + barW/2}" y="${topY - 14}" text-anchor="middle" font-family="Rye" font-size="44" fill="${fillMain}" stroke="${stroke}" stroke-width="0.6">${value}</text>`;
+      // Trophy if winner
+      if (isWinner) {
+        s += `<text x="${x + barW/2}" y="${topY - 56}" text-anchor="middle" font-size="32">🏆</text>`;
+      }
+      // Name below baseline
+      s += `<text x="${x + barW/2}" y="${baseY + 30}" text-anchor="middle" font-family="Rye" font-size="24" fill="#3e2412" letter-spacing="1">${escape(name)}</text>`;
+      // Total points stat
+      s += `<text x="${x + barW/2}" y="${baseY + 54}" text-anchor="middle" font-family="Special Elite" font-size="14" fill="#5b3520">${points} pts en total</text>`;
+      return s;
+    }
+
+    html += drawBar(lucaX, lucaH, '#a32424', '#5a0c0c', '#3a0808', lucaWins, state.teamNames.luca, lucaPts, lucaWins > agusWins);
+    html += drawBar(agusX, agusH, '#3a5a2c', '#1a3010', '#0d1c08', agusWins, state.teamNames.agus, agusPts, agusWins > lucaWins);
+
+    // VS in the middle
+    html += `<text x="${w/2}" y="${baseY - innerH/2 + 8}" text-anchor="middle" font-family="Rye" font-size="32" fill="#c08a3d" stroke="#3e2412" stroke-width="0.8" opacity=".55">vs</text>`;
+
+    svg.innerHTML = html;
+  }
+
+  function drawList() {
+    const list = document.getElementById('game-list');
+    if (state.history.length === 0) {
+      list.innerHTML = `<div class="empty-msg">— sin partidas en el historial —</div>`;
+      return;
+    }
+    list.innerHTML = state.history
+      .map((g, idx) => ({ g, idx }))
+      .reverse()
+      .map(({g, idx}) => {
+        const num = idx + 1;
+        const date = new Date(g.date);
+        const dateStr =
+          date.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'2-digit' }) +
+          ' · ' +
+          date.toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' });
+        const winnerStr = g.winner === 'empate'
+          ? '🤝 empate'
+          : '🏆 ' + (g.winner === 'luca' ? g.lucaName : g.agusName);
+        const lucaW = g.winner === 'luca' ? 'win' : '';
+        const agusW = g.winner === 'agus' ? 'win' : '';
+        return `
+          <div class="game-row">
+            <div class="date">#${num}<br>${dateStr}</div>
+            <div class="luca ${lucaW}">${escape(g.lucaName)}</div>
+            <div class="scores">${g.luca} – ${g.agus}</div>
+            <div class="agus ${agusW}">${escape(g.agusName)}</div>
+            <div class="winner">${winnerStr}</div>
+            <button class="del" data-idx="${idx}" title="Borrar">✕</button>
+          </div>
+        `;
+      }).join('');
+
+    list.querySelectorAll('.del').forEach(b => {
+      b.addEventListener('click', () => deleteHistoryAt(parseInt(b.dataset.idx)));
+    });
+  }
+
+  /* ====== Wiring ====== */
+  document.querySelectorAll('.score-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      adjust(btn.dataset.team, parseInt(btn.dataset.delta));
+    });
+  });
+
+  document.querySelectorAll('.editable').forEach(el => {
+    const team = el.dataset.team;
+    el.addEventListener('blur', () => {
+      const txt = (el.textContent || '').trim() || (team === 'luca' ? 'Luca' : 'Agus');
+      state.teamNames[team] = txt;
+      el.textContent = txt;
+      save(); renderHistory();
+    });
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+    });
+  });
+
+  document.getElementById('save-btn').addEventListener('click', saveCurrentAsHistory);
+  document.getElementById('reset-btn').addEventListener('click', () => resetCurrent(false));
+
+  document.getElementById('export-btn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'truco-historial-' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    toast('Historial exportado');
+  });
+
+  document.getElementById('import-btn').addEventListener('click', () => {
+    document.getElementById('import-file').click();
+  });
+  document.getElementById('import-file').addEventListener('change', (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const obj = JSON.parse(evt.target.result);
+        if (!confirm('¿Reemplazar el historial actual con el importado?')) return;
+        state = { ...defaultState(), ...obj };
+        save(); render();
+        toast('Historial importado');
+      } catch (err) {
+        alert('Archivo inválido');
+      }
+    };
+    reader.readAsText(f);
+    e.target.value = '';
+  });
+
+  document.getElementById('winner-save').addEventListener('click', () => {
+    document.getElementById('winner-banner').classList.remove('show');
+    saveCurrentAsHistory();
+  });
+  document.getElementById('winner-keep').addEventListener('click', () => {
+    document.getElementById('winner-banner').classList.remove('show');
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const t = e.target;
+    if (t.isContentEditable || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;
+    if (e.key === 'q' || e.key === 'Q') adjust('luca', 1);
+    else if (e.key === 'a' || e.key === 'A') adjust('luca', -1);
+    else if (e.key === 'p' || e.key === 'P') adjust('agus', 1);
+    else if (e.key === 'l' || e.key === 'L') adjust('agus', -1);
+  });
+
+  /* initial paint */
+  render();
+</script>
+</body>
+</html>
